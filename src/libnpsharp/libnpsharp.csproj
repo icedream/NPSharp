@@ -71,6 +71,7 @@
     <Compile Include="Rpc\Packets\StorageWriteUserFileMessage.cs" />
     <Compile Include="Rpc\Packets\StorageWriteUserFileResultMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Authentication\AuthenticationHelper.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
