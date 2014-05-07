@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NPSharp.Rpc;
 using NPSharp.Rpc.Packets;
+using log4net;
 
 namespace NPSharp
 {
@@ -17,6 +18,7 @@ namespace NPSharp
         private readonly RpcClientStream _rpc;
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationToken _cancellationToken;
+		private ILog _log;
 
         /// <summary>
         /// Initializes the NP client with a specified host and port.
@@ -26,6 +28,7 @@ namespace NPSharp
         public NpClient(string host, ushort port = 3025)
         {
             _rpc = new RpcClientStream(host, port);
+			_log = LogManager.GetLogger ("NPClient");
         }
 
         /// <summary>
@@ -53,8 +56,7 @@ namespace NPSharp
 
             Task.Factory.StartNew(() =>
             {
-                Debug.WriteLine("Processing thread start");
-
+				_log.Debug("Now receiving RPC messages");
                 try
                 {
                     while (true)
@@ -69,10 +71,11 @@ namespace NPSharp
                 }
                 catch (ProtocolViolationException error)
                 {
-                    Console.WriteLine("Protocol violation: {0}. Disconnect imminent.", error.Message);
+                    _log.ErrorFormat("Protocol violation: {0}. Disconnect imminent.", error.Message);
+					Disconnect();
                 }
 
-                Debug.WriteLine("Processing thread exit");
+				_log.Debug("Now not receiving RPC messages anymore");
             }, _cancellationToken);
 
             return true;
