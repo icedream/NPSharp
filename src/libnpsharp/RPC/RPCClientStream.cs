@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using log4net;
 using NPSharp.RPC.Packets;
 
 namespace NPSharp.RPC
@@ -12,6 +13,7 @@ namespace NPSharp.RPC
     {
         private NetworkStream _ns;
         private uint _id;
+        private ILog _log;
 
         private readonly string _host;
         private readonly ushort _port;
@@ -27,6 +29,7 @@ namespace NPSharp.RPC
         {
             _host = host;
             _port = port;
+            _log = LogManager.GetLogger("RPC");
         }
 
         /// <summary>
@@ -98,6 +101,9 @@ namespace NPSharp.RPC
             var buffer = message.Serialize(_id);
 
             _ns.Write(buffer, 0, buffer.Length);
+            _ns.Flush();
+
+            _log.DebugFormat("Sent packet ID {1} (type {0})", message.GetType().Name, _id);
 
             return _id++;
         }
@@ -121,6 +127,8 @@ namespace NPSharp.RPC
 
             _callbacks[message.MessageId].Invoke(message);
             _callbacks.Remove(message.MessageId);
+
+            _log.DebugFormat("Received packet ID {1} (type {0})", message.GetType().Name, message.MessageId);
 
             return message;
         }

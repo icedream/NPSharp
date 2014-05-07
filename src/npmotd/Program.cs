@@ -1,5 +1,10 @@
 ﻿using System;
 using System.Text;
+using log4net;
+using log4net.Appender;
+using log4net.Config;
+using log4net.Core;
+using log4net.Layout;
 using NPSharp.Authentication;
 
 namespace NPSharp.CommandLine.MOTD
@@ -8,9 +13,25 @@ namespace NPSharp.CommandLine.MOTD
     {
         static void Main(string[] args)
         {
+            // log4net setup
+            var appender = new ColoredConsoleAppender
+            {
+                Threshold = Level.Debug,
+                Layout = new PatternLayout("%level [%thread] %d{HH:mm:ss} - %message%newline"),
+            };
+            appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Debug, ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity });
+            appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Info, ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity });
+            appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Warn, ForeColor = ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity });
+            appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Error, ForeColor = ColoredConsoleAppender.Colors.Red | ColoredConsoleAppender.Colors.HighIntensity });
+            appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Fatal, ForeColor = ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity, BackColor = ColoredConsoleAppender.Colors.Red });
+            appender.ActivateOptions();
+            BasicConfigurator.Configure(new IAppender[]{appender,new DebugAppender{Layout=appender.Layout,Threshold=Level.All}});
+
+            var log = LogManager.GetLogger("Main");
+
             if (args.Length < 4)
             {
-                Console.Error.WriteLine("Needs 4 arguments: hostname port username password");
+                log.ErrorFormat("Needs 4 arguments: hostname port username password");
                 return;
             }
 
@@ -20,10 +41,11 @@ namespace NPSharp.CommandLine.MOTD
             var password = args[3];
 
             // NP connection setup
+            log.DebugFormat("Connecting to {0}:{1}...", hostname, port);
             var np = new NPClient(hostname, port);
             if (!np.Connect())
             {
-                Console.Error.WriteLine("Connection to NP server failed.");
+                log.Error("Connection to NP server failed.");
                 return;
             }
 
@@ -35,10 +57,11 @@ namespace NPSharp.CommandLine.MOTD
             }
             catch (Exception err)
             {
+                np.Disconnect();
 #if DEBUG
-                Console.Error.WriteLine("Could not authenticate: {0}", err);
+                log.ErrorFormat("Could not authenticate: {0}", err);
 #else
-                Console.Error.WriteLine("Could not authenticate: {0}", err.Message);
+                log.ErrorFormat("Could not authenticate: {0}", err.Message);
 #endif
                 return;
             }
@@ -51,9 +74,9 @@ namespace NPSharp.CommandLine.MOTD
             catch (Exception err)
             {
 #if DEBUG
-                Console.Error.WriteLine("Authenticated but session token was invalid. {0}", err);
+                log.ErrorFormat("Authenticated but session token was invalid. {0}", err);
 #else
-                Console.Error.WriteLine("Authenticated but session token was invalid ({0}).", err.Message);
+                log.ErrorFormat("Authenticated but session token was invalid ({0}).", err.Message);
 #endif
                 return;
             }
@@ -64,7 +87,7 @@ namespace NPSharp.CommandLine.MOTD
             }
             catch
             {
-                Console.Error.WriteLine("Could not read MOTD from NP server.");
+                log.ErrorFormat("Could not read MOTD from NP server.");
             }
 
 

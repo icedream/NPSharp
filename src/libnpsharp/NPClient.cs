@@ -18,6 +18,7 @@ namespace NPSharp
         private readonly RPCClientStream _rpc;
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationToken _cancellationToken;
+        private Task _procTask;
 		private readonly ILog _log;
 
         /// <summary>
@@ -48,25 +49,22 @@ namespace NPSharp
         /// <returns>True if the connection succeeded, otherwise false.</returns>
         public bool Connect()
         {
+            _log.Debug("Connect() start");
+
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;
 
             if (!_rpc.Open())
                 return false;
 
-            Task.Factory.StartNew(() =>
+            _procTask = Task.Factory.StartNew(() =>
             {
 				_log.Debug("Now receiving RPC messages");
                 try
                 {
                     while (true)
                     {
-                        var message = _rpc.Read();
-                        if (message == null)
-                            continue;
-
-                        // TODO: log4net
-                        Console.WriteLine("Received packet ID {1} (type {0})", message.GetType().Name, message.MessageId);
+                        _rpc.Read();
                     }
                 }
                 catch (ProtocolViolationException error)
@@ -78,6 +76,7 @@ namespace NPSharp
 				_log.Debug("Now not receiving RPC messages anymore");
             }, _cancellationToken);
 
+            _log.Debug("Connect() done");
             return true;
         }
 
@@ -86,10 +85,15 @@ namespace NPSharp
         /// </summary>
         public void Disconnect()
         {
+            _log.Debug("Disconnect() start");
+
             _cancellationTokenSource.Cancel(true); // TODO: Find a cleaner way to cancel _processingTask (focus: _rpc.Read)
+            _procTask.Wait(_cancellationToken);
             _rpc.Close();
 
             LoginId = 0;
+
+            _log.Debug("Disconnect() done");
         }
 
         // TODO: Try to use an exception for failed action instead
