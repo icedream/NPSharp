@@ -52,26 +52,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NpClient.cs" />
+    <Compile Include="NPClient.cs" />
     <Compile Include="NPFileException.cs" />
-    <Compile Include="Rpc\RpcClientStream.cs" />
-    <Compile Include="Rpc\Packets\AuthenticateExternalStatusMessage.cs" />
-    <Compile Include="Rpc\Packets\AuthenticateResultMessage.cs" />
-    <Compile Include="Rpc\Packets\AuthenticateWithTokenMessage.cs" />
-    <Compile Include="Rpc\Packets\CloseAppMessage.cs" />
-    <Compile Include="Rpc\Packets\HelloMessage.cs" />
-    <Compile Include="Rpc\Packets\MessagingSendDataMessage.cs" />
-    <Compile Include="Rpc\Packets\RpcMessage.cs" />
-    <Compile Include="Rpc\Packets\PacketAttribute.cs" />
-    <Compile Include="Rpc\Packets\RpcClientMessage.cs" />
-    <Compile Include="Rpc\Packets\RpcServerMessage.cs" />
-    <Compile Include="Rpc\Packets\StorageGetUserFileMessage.cs" />
-    <Compile Include="Rpc\Packets\StorageGetPublisherFileMessage.cs" />
-    <Compile Include="Rpc\Packets\StoragePublisherFileMessage.cs" />
-    <Compile Include="Rpc\Packets\StorageSendRandomStringMessage.cs" />
-    <Compile Include="Rpc\Packets\StorageUserFileMessage.cs" />
-    <Compile Include="Rpc\Packets\StorageWriteUserFileMessage.cs" />
-    <Compile Include="Rpc\Packets\StorageWriteUserFileResultMessage.cs" />
+    <Compile Include="RPC\RPCClientStream.cs" />
+    <Compile Include="RPC\Packets\AuthenticateExternalStatusMessage.cs" />
+    <Compile Include="RPC\Packets\AuthenticateResultMessage.cs" />
+    <Compile Include="RPC\Packets\AuthenticateWithTokenMessage.cs" />
+    <Compile Include="RPC\Packets\CloseAppMessage.cs" />
+    <Compile Include="RPC\Packets\HelloMessage.cs" />
+    <Compile Include="RPC\Packets\MessagingSendDataMessage.cs" />
+    <Compile Include="RPC\Packets\RPCMessage.cs" />
+    <Compile Include="RPC\Packets\PacketAttribute.cs" />
+    <Compile Include="RPC\Packets\RPCClientMessage.cs" />
+    <Compile Include="RPC\Packets\RPCServerMessage.cs" />
+    <Compile Include="RPC\Packets\StorageGetUserFileMessage.cs" />
+    <Compile Include="RPC\Packets\StorageGetPublisherFileMessage.cs" />
+    <Compile Include="RPC\Packets\StoragePublisherFileMessage.cs" />
+    <Compile Include="RPC\Packets\StorageSendRandomStringMessage.cs" />
+    <Compile Include="RPC\Packets\StorageUserFileMessage.cs" />
+    <Compile Include="RPC\Packets\StorageWriteUserFileMessage.cs" />
+    <Compile Include="RPC\Packets\StorageWriteUserFileResultMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\AuthenticationHelper.cs" />
   </ItemGroup>

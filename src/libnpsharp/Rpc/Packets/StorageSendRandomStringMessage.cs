@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
     [Packet(1104)]
     [ProtoContract]
-    class StorageSendRandomStringMessage : RpcClientMessage
+    class StorageSendRandomStringMessage : RPCClientMessage
     {
         [ProtoMember(1)]
         public string RandomString { get; set; }

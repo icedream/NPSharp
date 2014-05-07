@@ -4,18 +4,18 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using NPSharp.Rpc;
-using NPSharp.Rpc.Packets;
 using log4net;
+using NPSharp.RPC;
+using NPSharp.RPC.Packets;
 
 namespace NPSharp
 {
     /// <summary>
     /// Represents a high-level network platform client.
     /// </summary>
-    public class NpClient
+    public class NPClient
     {
-        private readonly RpcClientStream _rpc;
+        private readonly RPCClientStream _rpc;
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationToken _cancellationToken;
 		private ILog _log;
@@ -25,9 +25,9 @@ namespace NPSharp
         /// </summary>
         /// <param name="host">The host to connect to.</param>
         /// <param name="port">The port to use. Default: 3025.</param>
-        public NpClient(string host, ushort port = 3025)
+        public NPClient(string host, ushort port = 3025)
         {
-            _rpc = new RpcClientStream(host, port);
+            _rpc = new RPCClientStream(host, port);
 			_log = LogManager.GetLogger ("NPClient");
         }
 

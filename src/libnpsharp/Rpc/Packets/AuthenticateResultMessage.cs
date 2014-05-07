@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
     [Packet(1010)]
     [ProtoContract]
-    class AuthenticateResultMessage : RpcServerMessage
+    class AuthenticateResultMessage : RPCServerMessage
     {
         [ProtoMember(1)]
         public int Result { get; set; }

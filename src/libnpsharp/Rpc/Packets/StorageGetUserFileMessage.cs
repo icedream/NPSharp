@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
     [Packet(1102)]
     [ProtoContract]
-    class StorageGetUserFileMessage : RpcClientMessage
+    class StorageGetUserFileMessage : RPCClientMessage
     {
         [ProtoMember(1)]
         public string FileName { get; set; }

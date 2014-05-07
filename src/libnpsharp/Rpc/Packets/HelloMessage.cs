@@ -1,10 +1,10 @@
 ﻿using ProtoBuf;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
     [Packet(1000)]
     [ProtoContract]
-    class HelloMessage : RpcServerMessage
+    class HelloMessage : RPCServerMessage
     {
         // I seriously have no idea where in the code this is used but whatever
         [ProtoMember(1)]

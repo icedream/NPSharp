@@ -6,13 +6,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
-    public class RpcServerMessage : RpcMessage
+    public class RPCServerMessage : RPCMessage
     {
         public uint MessageId { get; private set; }
 
-        public static RpcServerMessage Deserialize(NetworkStream ns)
+        public static RPCServerMessage Deserialize(NetworkStream ns)
         {
             var header = new byte[16];
             var l = ns.Read(header, 0, header.Length);
@@ -30,13 +30,13 @@ namespace NPSharp.Rpc.Packets
             if (signature != Signature)
                 throw new ProtocolViolationException("Received packet with invalid signature");
 
-            RpcServerMessage packet;
+            RPCServerMessage packet;
 
             using (var ms = new MemoryStream(buffer))
             {
                 var types = Assembly.GetExecutingAssembly().GetTypes().Where(
                     t =>
-                        t.IsSubclassOf(typeof (RpcServerMessage))
+                        t.IsSubclassOf(typeof (RPCServerMessage))
                         &&
                         ((PacketAttribute) t.GetCustomAttributes(typeof (PacketAttribute), false).Single()).Type == type
                     ).ToArray();
@@ -53,7 +53,7 @@ namespace NPSharp.Rpc.Packets
                     return null;
 #endif
                 }
-                packet = (RpcServerMessage)ProtoBuf.Serializer.NonGeneric.Deserialize(
+                packet = (RPCServerMessage)ProtoBuf.Serializer.NonGeneric.Deserialize(
                         types.Single(),
                         ms
                     );

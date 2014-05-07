@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
     class PacketAttribute : Attribute
     {

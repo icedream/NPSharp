@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
     [Packet(2002)]
     [ProtoContract]
-    class MessagingSendDataMessage : RpcClientMessage
+    class MessagingSendDataMessage : RPCClientMessage
     {
         [ProtoMember(1)]
         public ulong NPID { get; set; }

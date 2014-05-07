@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace NPSharp.Rpc.Packets
+namespace NPSharp.RPC.Packets
 {
-    public class RpcClientMessage : RpcMessage
+    public class RPCClientMessage : RPCMessage
     {
         public byte[] Serialize(uint id)
         {

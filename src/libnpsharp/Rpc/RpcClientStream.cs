@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using NPSharp.Rpc.Packets;
+using NPSharp.RPC.Packets;
 
-namespace NPSharp.Rpc
+namespace NPSharp.RPC
 {
     /// <summary>
     /// Represents a low-level client stream which can communicate with an NP server using RPC packets.
     /// </summary>
-    public class RpcClientStream
+    public class RPCClientStream
     {
         private NetworkStream _ns;
         private uint _id;
@@ -16,14 +16,14 @@ namespace NPSharp.Rpc
         private readonly string _host;
         private readonly ushort _port;
 
-        private readonly Dictionary<uint, Action<RpcServerMessage>> _callbacks = new Dictionary<uint, Action<RpcServerMessage>>(); 
+        private readonly Dictionary<uint, Action<RPCServerMessage>> _callbacks = new Dictionary<uint, Action<RPCServerMessage>>(); 
 
         /// <summary>
         /// Initializes an RPC connection stream with a specified host and port.
         /// </summary>
         /// <param name="host">The host to connect to.</param>
         /// <param name="port">The port to use. Default: 3025.</param>
-        public RpcClientStream(string host, ushort port = 3025)
+        public RPCClientStream(string host, ushort port = 3025)
         {
             _host = host;
             _port = port;
@@ -77,7 +77,7 @@ namespace NPSharp.Rpc
         /// Attaches a callback to the next message being sent out. This allows handling response packets.
         /// </summary>
         /// <param name="callback">The method to call when we receive a response to the next message</param>
-        public void AttachCallback(Action<RpcServerMessage> callback)
+        public void AttachCallback(Action<RPCServerMessage> callback)
         {
             if (_callbacks.ContainsKey(_id))
                 throw new Exception("There is already a callback for the current message. You can only add max. one callback.");
@@ -90,7 +90,7 @@ namespace NPSharp.Rpc
         /// </summary>
         /// <param name="message">The RPC message to send out.</param>
         /// <returns>The new ID of the message.</returns>
-        public uint Send(RpcClientMessage message)
+        public uint Send(RPCClientMessage message)
         {
             if (_ns == null)
                 throw new InvalidOperationException("You need to open the stream first.");
@@ -106,12 +106,12 @@ namespace NPSharp.Rpc
         /// Waits for the next RPC message from the server and reads it.
         /// </summary>
         /// <returns>The received server message.</returns>
-        public RpcServerMessage Read()
+        public RPCServerMessage Read()
         {
             if (_ns == null)
                 throw new InvalidOperationException("You need to open the stream first.");
 
-            var message = RpcServerMessage.Deserialize(_ns);
+            var message = RPCServerMessage.Deserialize(_ns);
 
             if (message == null)
                 return null;
