@@ -1,10 +1,11 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // Allgemeine Informationen über eine Assembly werden über die folgenden 
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die mit einer Assembly verknüpft sind.
-[assembly: AssemblyTitle("NPSharp Library")]
+[assembly: AssemblyTitle("NPSharp MOTD test client")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Icedream")]
@@ -19,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt für COM verfügbar gemacht wird
-[assembly: Guid("0efdd0b5-fd69-48fd-b714-f4f0e032f417")]
+[assembly: Guid("b91f9ba4-757a-4c72-b12a-c3e1f1b05715")]
 
 // Versionsinformationen für eine Assembly bestehen aus den folgenden vier Werten:
 //
