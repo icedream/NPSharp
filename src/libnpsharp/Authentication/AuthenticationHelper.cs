@@ -80,9 +80,15 @@ namespace NPSharp.Authentication
             var rx = new Regex("^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>.+)$");
 			var resp = (HttpWebResponse)req.GetResponse ();
 			using (var respStream = resp.GetResponseStream()) {
+                if (respStream == null)
+                    throw new Exception(@"No answer from server");
 				using (var respReader = new StreamReader(respStream)) {
 					while (!respReader.EndOfStream) {
 						var line = respReader.ReadLine ();
+
+                        // No answer?
+					    if (string.IsNullOrEmpty(line))
+					        continue;
 
 						// DW response line found?
 						if (!rx.IsMatch (line))
