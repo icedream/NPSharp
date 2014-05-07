@@ -18,7 +18,7 @@ namespace NPSharp
         private readonly RPCClientStream _rpc;
         private CancellationTokenSource _cancellationTokenSource;
         private CancellationToken _cancellationToken;
-		private ILog _log;
+		private readonly ILog _log;
 
         /// <summary>
         /// Initializes the NP client with a specified host and port.
