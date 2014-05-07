@@ -17,9 +17,13 @@ namespace NPSharp.CommandLine.MOTD
             {
                 ah.Authenticate(username, password);
             }
-            catch
+            catch (Exception err)
             {
-                Console.Error.WriteLine("Could not authenticate.");
+#if DEBUG
+                Console.Error.WriteLine("Could not authenticate: {0}", err);
+#else
+                Console.Error.WriteLine("Could not authenticate: {0}", err.Message);
+#endif
                 return;
             }
 

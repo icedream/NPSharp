@@ -65,19 +65,19 @@ namespace NPSharp.Authentication
 				Path = _path
 			}.Uri;
 
-			var req = (HttpWebRequest)WebRequest.Create (uri);
+            var req = (HttpWebRequest)WebRequest.Create(uri);
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.AllowAutoRedirect = true;
 			using (var reqStream = req.GetRequestStream()) {
 				var buffer = Encoding.UTF8.GetBytes (post);
 				reqStream.Write (buffer, 0, post.Length);
 				reqStream.Flush ();
 			}
-			req.Method = "POST";
-			//req.ContentType = "application/x-www-urlencodedform";
-			req.AllowAutoRedirect = true;
 
 			// Response will be in this syntax:
 			// (ok|fail)#text#userid#username#email#sessiontoken
-			var rx = new Regex ("^(?P<status>ok|fail)#(?P<text>.+)#(?P<userid>[0-9]+)#(?P<username>.+)#(?P<usermail>.+)#(?P<sessiontoken>.+)$");
+            var rx = new Regex("^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>.+)$");
 			var resp = (HttpWebResponse)req.GetResponse ();
 			using (var respStream = resp.GetResponseStream()) {
 				using (var respReader = new StreamReader(respStream)) {
