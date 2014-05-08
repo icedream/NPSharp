@@ -77,7 +77,7 @@ namespace NPSharp.Authentication
 
 			// Response will be in this syntax:
 			// (ok|fail)#text#userid#username#email#sessiontoken
-            var rx = new Regex("^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>.+)$");
+            var rx = new Regex("^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>[^#]+)[#]*$");
 			var resp = (HttpWebResponse)req.GetResponse ();
 			using (var respStream = resp.GetResponseStream()) {
                 if (respStream == null)
