@@ -137,7 +137,16 @@ namespace NPSharp.CommandLine.File
 
         public Task Handle(IHttpContext context, Func<Task> next)
         {
-            var uri = string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
+            var uri = context.Request.QueryString.Any() ? null : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
+            if (context.Request.QueryString.Any())
+                if (!context.Request.QueryString.TryGetByName("uri", out uri))
+                {
+                    context.Response = HttpResponse.CreateWithMessage(HttpResponseCode.NotFound, "Invalid request",
+                        context.Request.Headers.KeepAliveConnection(),
+                        "You need to provide a <code>uri</code> parameter with the URL."
+                        );
+                    return Task.Factory.GetCompleted();
+                }
 
             var task = _np.GetUserFile(uri);
             try
@@ -150,13 +159,6 @@ namespace NPSharp.CommandLine.File
                     context.Request.Headers.KeepAliveConnection(),
                     string.Format("<pre><tt><code>{0}</code></tt></pre>", task.Exception == null ? "Unknown error" : task.Exception.ToString())
                     );
-                using (var sw = new StreamWriter(new MemoryStream()))
-                {
-                    sw.WriteLine("Content-type: {0}", "text/plain");
-                    sw.Flush();
-                    sw.BaseStream.Position = 0;
-                    context.Response.WriteHeaders(sw);
-                }
                 return Task.Factory.GetCompleted();
             }
 
@@ -180,7 +182,16 @@ namespace NPSharp.CommandLine.File
 
         public Task Handle(IHttpContext context, Func<Task> next)
         {
-            var uri = string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
+            var uri = context.Request.QueryString.Any() ? null : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
+            if (context.Request.QueryString.Any())
+                if (!context.Request.QueryString.TryGetByName("uri", out uri))
+                {
+                    context.Response = HttpResponse.CreateWithMessage(HttpResponseCode.NotFound, "Invalid request",
+                        context.Request.Headers.KeepAliveConnection(),
+                        "You need to provide a <code>uri</code> parameter with the URL."
+                        );
+                    return Task.Factory.GetCompleted();
+                }
 
             var task = _np.GetPublisherFile(uri);
             try
@@ -193,13 +204,6 @@ namespace NPSharp.CommandLine.File
                     context.Request.Headers.KeepAliveConnection(),
                     string.Format("<pre><tt><code>{0}</code></tt></pre>", task.Exception == null ? "Unknown error" : task.Exception.ToString())
                     );
-                using (var sw = new StreamWriter(new MemoryStream()))
-                {
-                    sw.WriteLine("Content-type: {0}", "text/plain");
-                    sw.Flush();
-                    sw.BaseStream.Position = 0;
-                    context.Response.WriteHeaders(sw);
-                }
                 return Task.Factory.GetCompleted();
             }
 
