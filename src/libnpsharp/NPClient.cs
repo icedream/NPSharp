@@ -117,7 +117,7 @@ namespace NPSharp
                 LoginId = result.NPID;
                 SessionToken = result.SessionToken;
                 tcs.SetResult(true);
-            });
+            }, 10);
             _rpc.Send(new AuthenticateWithTokenMessage {Token = token});
 
             return await tcs.Task;
@@ -140,7 +140,7 @@ namespace NPSharp
                 if (result.Result != 0)
                     tcs.SetResult(false);
                 tcs.SetResult(true);
-            });
+            }, 10);
             _rpc.Send(new StorageWriteUserFileMessage {FileData = contents, FileName = filename, NPID = LoginId});
 
             return await tcs.Task;
@@ -164,7 +164,7 @@ namespace NPSharp
                     return;
                 }
                 tcs.SetResult(result.FileData);
-            });
+            }, 10);
             _rpc.Send(new StorageGetUserFileMessage {FileName = filename, NPID = LoginId});
 
             return await tcs.Task;
@@ -202,7 +202,7 @@ namespace NPSharp
                     return;
                 }
                 tcs.SetResult(result.FileData);
-            });
+            }, 10);
             _rpc.Send(new StorageGetPublisherFileMessage {FileName = filename});
 
             return await tcs.Task;

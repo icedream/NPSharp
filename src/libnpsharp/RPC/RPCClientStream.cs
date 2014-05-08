@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using log4net;
 using NPSharp.RPC.Messages;
@@ -18,7 +19,7 @@ namespace NPSharp.RPC
         private readonly string _host;
         private readonly ushort _port;
 
-        private readonly Dictionary<uint, Action<RPCServerMessage>> _callbacks = new Dictionary<uint, Action<RPCServerMessage>>(); 
+        private readonly Dictionary<uint, Tuple<DateTime, Action<RPCServerMessage>>> _callbacks = new Dictionary<uint, Tuple<DateTime, Action<RPCServerMessage>>>(); 
 
         /// <summary>
         /// Initializes an RPC connection stream with a specified host and port.
@@ -71,6 +72,7 @@ namespace NPSharp.RPC
 
             try
             {
+                _callbacks.Clear();
                 _ns.Close(timeout);
                 _ns.Dispose();
             }
@@ -84,12 +86,14 @@ namespace NPSharp.RPC
         /// Attaches a callback to the next message being sent out. This allows handling response packets.
         /// </summary>
         /// <param name="callback">The method to call when we receive a response to the next message</param>
-        public void AttachCallback(Action<RPCServerMessage> callback)
+        /// <param name="timeout">Time in seconds from now in which this callback will expire for the next packet</param>
+        public void AttachCallback(Action<RPCServerMessage> callback, double timeout)
         {
+            _cleanupCallbacks();
             _log.DebugFormat("AttachCallback for packet id {0}", _id);
             if (_callbacks.ContainsKey(_id))
                 throw new Exception("There is already a callback for the current message. You can only add max. one callback.");
-            _callbacks.Add(_id, callback);
+            _callbacks.Add(_id, new Tuple<DateTime, Action<RPCServerMessage>>(DateTime.Now + TimeSpan.FromSeconds(timeout), callback));
         }
 
         // TODO: Exposure of message ID needed or no?
@@ -130,15 +134,21 @@ namespace NPSharp.RPC
                 return null;
             }
 
-            _log.DebugFormat("Received packet ID {1} (type {0})", message.GetType().Name, message.MessageId);
-
             if (!_callbacks.ContainsKey(message.MessageId))
                 return message;
 
-            _callbacks[message.MessageId].Invoke(message);
-            // TODO: Callback cleanup
+            _cleanupCallbacks();
+            if (_callbacks.ContainsKey(message.MessageId))
+                _callbacks[message.MessageId].Item2.Invoke(message);
 
             return message;
+        }
+
+        private void _cleanupCallbacks()
+        {
+            var cbr = (from item in _callbacks where item.Value.Item1 < DateTime.Now select item.Key).ToArray();
+            foreach (var cb in cbr)
+                _callbacks.Remove(cb);
         }
     }
 }
