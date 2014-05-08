@@ -16,8 +16,12 @@ namespace NPSharp.CommandLine.MOTD
             // log4net setup
             var appender = new ColoredConsoleAppender
             {
+#if DEBUG
                 Threshold = Level.Debug,
-                Layout = new PatternLayout("%level [%thread] %d{HH:mm:ss} - %message%newline"),
+#else
+                Threshold = Level.Info,
+#endif
+                Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
             };
             appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Debug, ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity });
             appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Info, ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity });
