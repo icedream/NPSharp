@@ -87,7 +87,7 @@ namespace NPSharp.CommandLine.MOTD
 
             try
             {
-                Console.WriteLine(Encoding.UTF8.GetString(np.GetPublisherFile("motd-english.txt").Result));
+                log.InfoFormat("Server says: {0}", Encoding.UTF8.GetString(np.GetPublisherFile("motd-english.txt").Result));
             }
             catch
             {

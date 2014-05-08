@@ -19,7 +19,7 @@ namespace NPSharp.RPC.Messages
 #if DEBUG
             foreach (var prop in GetType().GetProperties())
             {
-                Console.WriteLine("\t{0} = {1}", prop.Name, prop.GetValue(this));
+                _log.DebugFormat("\tMessage property: {0} = {1}", prop.Name, prop.GetValue(this));
             }
 #endif
 
