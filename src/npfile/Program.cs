@@ -148,6 +148,7 @@ namespace NPSharp.CommandLine.File
                     return Task.Factory.GetCompleted();
                 }
 
+            _log.InfoFormat("Requesting user file {0}", uri);
             var task = _np.GetUserFile(uri);
             try
             {
@@ -193,6 +194,7 @@ namespace NPSharp.CommandLine.File
                     return Task.Factory.GetCompleted();
                 }
 
+            _log.InfoFormat("Requesting publisher file {0}", uri);
             var task = _np.GetPublisherFile(uri);
             try
             {
