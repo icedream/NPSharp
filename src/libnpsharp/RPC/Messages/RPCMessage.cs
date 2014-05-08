@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 
-namespace NPSharp.RPC.Packets
+namespace NPSharp.RPC.Messages
 {
-    public class RPCMessage
+    public abstract class RPCMessage
     {
         internal const uint Signature = 0xDEADC0DE; // I wonder if aiw3 changed this since kernal noted it in his source code.
 

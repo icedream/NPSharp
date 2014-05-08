@@ -1,10 +1,10 @@
 ﻿using ProtoBuf;
 
-namespace NPSharp.RPC.Packets
+namespace NPSharp.RPC.Messages
 {
     [Packet(1003)]
     [ProtoContract]
-    class AuthenticateWithTokenMessage : RPCClientMessage
+    public sealed class AuthenticateWithTokenMessage : RPCClientMessage
     {
         [ProtoMember(1)]
         public string Token { get; set; }

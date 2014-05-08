@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.RPC.Packets
+namespace NPSharp.RPC.Messages
 {
     [Packet(1113)]
     [ProtoContract]
-    class StorageWriteUserFileResultMessage : RPCServerMessage
+    public sealed class StorageWriteUserFileResultMessage : RPCServerMessage
     {
         [ProtoMember(1)]
         public int Result { get; set; }

@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.RPC.Packets
+namespace NPSharp.RPC.Messages
 {
     [Packet(1006)]
     [ProtoContract]
-    class AuthenticateExternalStatusMessage : RPCServerMessage
+    public sealed class AuthenticateExternalStatusMessage : RPCServerMessage
     {
         [ProtoMember(1)]
         public int Status { get; set; }

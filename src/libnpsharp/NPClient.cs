@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using NPSharp.RPC;
-using NPSharp.RPC.Packets;
+using NPSharp.RPC.Messages;
 
 namespace NPSharp
 {
@@ -88,7 +88,7 @@ namespace NPSharp
             _log.Debug("Disconnect() start");
 
             _cancellationTokenSource.Cancel(true); // TODO: Find a cleaner way to cancel _processingTask (focus: _rpc.Read)
-            _procTask.Wait(_cancellationToken);
+            //_procTask.Wait(_cancellationToken);
             _rpc.Close();
 
             LoginId = 0;

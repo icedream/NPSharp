@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace NPSharp.RPC.Packets
+namespace NPSharp.RPC.Messages
 {
-    class PacketAttribute : Attribute
+    internal sealed class PacketAttribute : Attribute
     {
         public PacketAttribute(uint type)
         {

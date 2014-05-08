@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.RPC.Packets
+namespace NPSharp.RPC.Messages
 {
-    [Packet(1111)]
+    [Packet(1112)]
     [ProtoContract]
-    class StoragePublisherFileMessage : RPCServerMessage
+    public sealed class StorageUserFileMessage : RPCServerMessage
     {
         [ProtoMember(1)]
         public int Result { get; set; }
@@ -13,6 +13,9 @@ namespace NPSharp.RPC.Packets
         public string FileName { get; set; }
 
         [ProtoMember(3)]
+        public ulong NPID { get; set; }
+
+        [ProtoMember(4)]
         public byte[] FileData { get; set; }
     }
 }

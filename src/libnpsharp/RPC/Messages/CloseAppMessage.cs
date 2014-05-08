@@ -1,10 +1,10 @@
 using ProtoBuf;
 
-namespace NPSharp.RPC.Packets
+namespace NPSharp.RPC.Messages
 {
     [Packet(2001)]
     [ProtoContract]
-    class CloseAppMessage : RPCServerMessage
+    public sealed class CloseAppMessage : RPCServerMessage
     {
         [ProtoMember(1)]
         public string Reason { get; set; }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using log4net;
-using NPSharp.RPC.Packets;
+using NPSharp.RPC.Messages;
 
 namespace NPSharp.RPC
 {
@@ -13,7 +13,7 @@ namespace NPSharp.RPC
     {
         private NetworkStream _ns;
         private uint _id;
-        private ILog _log;
+        private readonly ILog _log;
 
         private readonly string _host;
         private readonly ushort _port;
@@ -38,6 +38,8 @@ namespace NPSharp.RPC
         /// <returns>True if the connection succeeded, otherwise false.</returns>
         public bool Open()
         {
+            _log.Debug("Open() start");
+
             // Connection already established?
             if (_ns != null)
                 throw new InvalidOperationException("Connection already opened");
@@ -52,6 +54,8 @@ namespace NPSharp.RPC
                 return false;
             }
             _ns = tcp.GetStream();
+
+            _log.Debug("Open() end");
             return true;
         }
 
@@ -82,6 +86,7 @@ namespace NPSharp.RPC
         /// <param name="callback">The method to call when we receive a response to the next message</param>
         public void AttachCallback(Action<RPCServerMessage> callback)
         {
+            _log.DebugFormat("AttachCallback for packet id {0}", _id);
             if (_callbacks.ContainsKey(_id))
                 throw new Exception("There is already a callback for the current message. You can only add max. one callback.");
             _callbacks.Add(_id, callback);
@@ -120,15 +125,18 @@ namespace NPSharp.RPC
             var message = RPCServerMessage.Deserialize(_ns);
 
             if (message == null)
+            {
+                _log.Debug("Recv NULL message");
                 return null;
+            }
+
+            _log.DebugFormat("Received packet ID {1} (type {0})", message.GetType().Name, message.MessageId);
 
             if (!_callbacks.ContainsKey(message.MessageId))
                 return message;
 
             _callbacks[message.MessageId].Invoke(message);
             _callbacks.Remove(message.MessageId);
-
-            _log.DebugFormat("Received packet ID {1} (type {0})", message.GetType().Name, message.MessageId);
 
             return message;
         }
