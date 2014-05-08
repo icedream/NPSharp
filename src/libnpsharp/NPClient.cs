@@ -160,7 +160,7 @@ namespace NPSharp
                 var result = (StorageUserFileMessage) packet;
                 if (result.Result != 0)
                 {
-                    tcs.SetException(new NpFileException());
+                    tcs.SetException(new NpFileException(result.Result));
                     return;
                 }
                 tcs.SetResult(result.FileData);
@@ -198,7 +198,7 @@ namespace NPSharp
                 var result = (StoragePublisherFileMessage) packet;
                 if (result.Result != 0)
                 {
-                    tcs.SetException(new NpFileException());
+                    tcs.SetException(new NpFileException(result.Result));
                     return;
                 }
                 tcs.SetResult(result.FileData);

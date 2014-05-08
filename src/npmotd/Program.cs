@@ -33,6 +33,7 @@ namespace NPSharp.CommandLine.MOTD
 
             var log = LogManager.GetLogger("Main");
 
+            // Arguments
             if (args.Length < 4)
             {
                 log.ErrorFormat("Needs 4 arguments: hostname port username password");
