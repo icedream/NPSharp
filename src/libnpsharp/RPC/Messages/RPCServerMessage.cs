@@ -90,6 +90,15 @@ namespace NPSharp.RPC.Messages
 
             packet.MessageId = pid;
 
+#if DEBUG
+            Log.DebugFormat("ServerMessage[ID={0},Type={1},TypeName={2}] {{", pid, packet.GetTypeId(), packet.GetType().Name);
+            foreach (var prop in packet.GetType().GetProperties())
+            {
+                Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(packet));
+            }
+            Log.DebugFormat("}} => Read from {0} bytes", header.Length + buffer.Length);
+#endif
+
             return packet;
         }
     }

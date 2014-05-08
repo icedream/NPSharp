@@ -7,19 +7,20 @@ namespace NPSharp.RPC.Messages
     public abstract class RPCClientMessage : RPCMessage
     {
 
-        private static readonly ILog _log;
+        private static readonly ILog Log;
 
         static RPCClientMessage()
         {
-            _log = LogManager.GetLogger("RPCClientMessage");
+            Log = LogManager.GetLogger("RPCClientMessage");
         }
 
         public byte[] Serialize(uint id)
         {
 #if DEBUG
+            Log.DebugFormat("Packet[ID={0},Type={1},TypeName={2}] {{", id, GetTypeId(), GetType().Name);
             foreach (var prop in GetType().GetProperties())
             {
-                _log.DebugFormat("\tMessage property: {0} = {1}", prop.Name, prop.GetValue(this));
+                Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(this));
             }
 #endif
 
@@ -31,7 +32,7 @@ namespace NPSharp.RPC.Messages
                 content = bufferStream.ToArray();
             }
 
-            _log.DebugFormat("Serialized packet to {0} bytes", content.Length);
+            Log.DebugFormat("}} => Serialized to {0} bytes", content.Length);
 
             byte[] buffArray;
             using (var ms = new MemoryStream())
