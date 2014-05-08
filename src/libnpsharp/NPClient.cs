@@ -108,7 +108,10 @@ namespace NPSharp
 
             _rpc.AttachCallback(packet =>
             {
-                var result = (AuthenticateResultMessage) packet;
+                var result = packet as AuthenticateResultMessage;
+                if (result == null)
+                    return;
+
                 if (result.Result != 0)
                     tcs.SetResult(false);
                 LoginId = result.NPID;

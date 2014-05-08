@@ -17,7 +17,7 @@ namespace NPSharp.RPC.Messages
         public byte[] Serialize(uint id)
         {
 #if DEBUG
-            Log.DebugFormat("Packet[ID={0},Type={1},TypeName={2}] {{", id, GetTypeId(), GetType().Name);
+            Log.DebugFormat("RPCClientMessage[ID={0},Type={1},TypeName={2}] {{", id, GetTypeId(), GetType().Name);
             foreach (var prop in GetType().GetProperties())
             {
                 Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(this));
