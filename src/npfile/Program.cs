@@ -138,8 +138,8 @@ namespace NPSharp.CommandLine.File
         public Task Handle(IHttpContext context, Func<Task> next)
         {
             var uri = context.Request.QueryString.Any() ? null : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
-            if (context.Request.QueryString.Any())
-                if (!context.Request.QueryString.TryGetByName("uri", out uri))
+            if (uri == null)
+                if (!context.Request.QueryString.TryGetByName("uri", out uri) || uri == null)
                 {
                     context.Response = HttpResponse.CreateWithMessage(HttpResponseCode.NotFound, "Invalid request",
                         context.Request.Headers.KeepAliveConnection(),
@@ -184,8 +184,8 @@ namespace NPSharp.CommandLine.File
         public Task Handle(IHttpContext context, Func<Task> next)
         {
             var uri = context.Request.QueryString.Any() ? null : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
-            if (context.Request.QueryString.Any())
-                if (!context.Request.QueryString.TryGetByName("uri", out uri))
+            if (uri == null)
+                if (!context.Request.QueryString.TryGetByName("uri", out uri) || uri == null)
                 {
                     context.Response = HttpResponse.CreateWithMessage(HttpResponseCode.NotFound, "Invalid request",
                         context.Request.Headers.KeepAliveConnection(),
