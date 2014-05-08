@@ -92,7 +92,7 @@ namespace NPSharp.RPC.Messages
 
 #if DEBUG
             Log.DebugFormat("RPCServerMessage[ID={0},Type={1},TypeName={2}] {{", pid, packet.GetTypeId(), packet.GetType().Name);
-            foreach (var prop in packet.GetType().GetProperties().Where(p => !(p.DeclaringType is RPCServerMessage)))
+            foreach (var prop in packet.GetType().GetProperties().Where(p => !(p.DeclaringType == typeof (RPCServerMessage))))
             {
                 Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(packet));
             }
