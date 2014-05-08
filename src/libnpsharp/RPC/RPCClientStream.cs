@@ -136,7 +136,7 @@ namespace NPSharp.RPC
                 return message;
 
             _callbacks[message.MessageId].Invoke(message);
-            _callbacks.Remove(message.MessageId);
+            // TODO: Callback cleanup
 
             return message;
         }
