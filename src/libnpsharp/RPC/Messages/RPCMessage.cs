@@ -67,7 +67,7 @@ namespace NPSharp.RPC.Messages
 #if !DEBUG
             catch (Exception error)
             {
-                Log.Error("Error while reading from network socket", error)
+                Log.Error("Error while reading from network socket", error);
                 return null;
             }
 #endif
@@ -97,7 +97,7 @@ namespace NPSharp.RPC.Messages
 
             using (var ms = new MemoryStream(buffer))
             {
-                Type[] types = Assembly.GetExecutingAssembly().GetTypes().Where(
+                var types = Assembly.GetExecutingAssembly().GetTypes().Where(
                     t =>
                         t.IsSubclassOf(typeof (T))
                         &&

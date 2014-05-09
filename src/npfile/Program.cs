@@ -91,11 +91,28 @@ namespace NPSharp.CommandLine.File
                 return;
             }
 
-            string hostname = args[0];
-            ushort port = ushort.Parse(args[1]);
-            string username = args[2];
-            string password = args[3];
-            int hport = args.Length > 4 ? ushort.Parse(args[4]) : 5680;
+            var hostname = args[0];
+            var port = ushort.Parse(args[1]);
+            var username = args[2];
+            var password = args[3];
+            var hport = args.Length > 4 ? ushort.Parse(args[4]) : 5680;
+
+            // Get session token
+            var ah = new SessionAuthenticationClient(hostname);
+            try
+            {
+                ah.Authenticate(username, password);
+                log.Info("NP authentication successful.");
+            }
+            catch (Exception err)
+            {
+#if DEBUG
+                log.ErrorFormat("Could not authenticate: {0}", err);
+#else
+                log.ErrorFormat("Could not authenticate: {0}", err.Message);
+#endif
+                return;
+            }
 
             // NP connection setup
             log.DebugFormat("Connecting to {0}:{1}...", hostname, port);
@@ -105,26 +122,14 @@ namespace NPSharp.CommandLine.File
                 log.Error("Connection to NP server failed.");
                 return;
             }
-            log.Info("NP connection successful, authenticating...");
-
-            // Get session token
-            var ah = new SessionAuthenticationClient(hostname);
-            try
-            {
-                ah.Authenticate(username, password);
-                np.AuthenticateWithToken(ah.SessionToken).Wait();
-                log.Info("NP authentication successful.");
-            }
-            catch (Exception err)
+            if (!np.AuthenticateWithToken(ah.SessionToken).Result)
             {
                 np.Disconnect();
-#if DEBUG
-                log.ErrorFormat("Could not authenticate: {0}", err);
-#else
-                log.ErrorFormat("Could not authenticate: {0}", err.Message);
-#endif
+                log.Error("Authentication to NP server failed.");
                 return;
             }
+            log.Info("NP connection successful, authenticating...");
+
 
             // HTTP server
             using (var httpServer = new HttpServer(new HttpRequestProvider()))

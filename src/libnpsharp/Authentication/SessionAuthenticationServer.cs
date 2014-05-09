@@ -57,7 +57,10 @@ namespace NPSharp.Authentication
             {
                 throw new InvalidOperationException("This server is already running");
             }
+
+            _log.Debug("Starting authentication server...");
             _http = new HttpServer(new HttpRequestProvider());
+            _http.Use(new TcpListenerAdapter(new TcpListener(IPAddress.Any, port)));
             _http.Use(new TcpListenerAdapter(new TcpListener(IPAddress.IPv6Any, port)));
             _http.Use(new HttpRouter().With("authenticate", new AuthenticateHandler(this)));
             _http.Use(new AnonymousHttpRequestHandler((ctx, task) =>
@@ -67,6 +70,7 @@ namespace NPSharp.Authentication
                 return Task.Factory.GetCompleted();
             }));
             _http.Start();
+            _log.Debug("Done starting authentication server.");
         }
 
         /// <summary>
