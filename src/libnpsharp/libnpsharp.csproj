@@ -54,8 +54,17 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientEventArgs.cs" />
     <Compile Include="NPClient.cs" />
     <Compile Include="NPFileException.cs" />
+    <Compile Include="NPServer.cs" />
+    <Compile Include="RPC\Messages\AuthenticateRegisterServerMessage.cs" />
+    <Compile Include="RPC\Messages\AuthenticateRegisterServerResultMessage.cs" />
+    <Compile Include="RPC\Messages\AuthenticateUserGroupMessage.cs" />
+    <Compile Include="RPC\Messages\AuthenticateValidateTicketMessage.cs" />
+    <Compile Include="RPC\Messages\AuthenticateValidateTicketResultMessage.cs" />
+    <Compile Include="RPC\Messages\AuthenticateWithDetailsMessage.cs" />
+    <Compile Include="RPC\Messages\AuthenticateWithKeyMessage.cs" />
     <Compile Include="RPC\Messages\FriendDetails.cs" />
     <Compile Include="RPC\Messages\FriendsSetSteamIDMessage.cs" />
     <Compile Include="RPC\Messages\FriendsGetProfileDataMessage.cs" />
@@ -87,8 +96,18 @@
     <Compile Include="RPC\Messages\StorageWriteUserFileResultMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\AuthenticationHelper.cs" />
+    <Compile Include="RPC\RPCServerStream.cs" />
+    <Compile Include="RPC\RPCStream.cs" />
+    <Compile Include="Steam\CSteamID.cs" />
+    <Compile Include="Steam\EAccountType.cs" />
+    <Compile Include="Steam\EUniverse.cs" />
+    <Compile Include="Steam\InteropHelp.cs" />
+    <Compile Include="Steam\SteamID_t.cs" />
+    <Compile Include="Ticket.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Steam\README.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

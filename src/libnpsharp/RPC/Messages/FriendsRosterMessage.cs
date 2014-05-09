@@ -6,7 +6,9 @@ namespace NPSharp.RPC.Messages
     [Packet(1211)]
     public sealed class FriendsRosterMessage : RPCServerMessage
     {
-        internal FriendsRosterMessage() { }
+        internal FriendsRosterMessage()
+        {
+        }
 
         [ProtoMember(1)]
         public FriendDetails[] Friends { get; set; }

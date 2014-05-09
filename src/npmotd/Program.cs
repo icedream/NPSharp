@@ -9,9 +9,9 @@ using NPSharp.Authentication;
 
 namespace NPSharp.CommandLine.MOTD
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // log4net setup
             if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
@@ -25,7 +25,8 @@ namespace NPSharp.CommandLine.MOTD
 #endif
                     Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
                 };
-                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+                BasicConfigurator.Configure(new IAppender[]
+                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
             }
             else
             {
@@ -38,16 +39,38 @@ namespace NPSharp.CommandLine.MOTD
 #endif
                     Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
                 };
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Debug, ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Info, ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Warn, ForeColor = ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Error, ForeColor = ColoredConsoleAppender.Colors.Red | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Fatal, ForeColor = ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity, BackColor = ColoredConsoleAppender.Colors.Red });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Debug,
+                    ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Info,
+                    ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Warn,
+                    ForeColor = ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Error,
+                    ForeColor = ColoredConsoleAppender.Colors.Red | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Fatal,
+                    ForeColor = ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity,
+                    BackColor = ColoredConsoleAppender.Colors.Red
+                });
                 appender.ActivateOptions();
-                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+                BasicConfigurator.Configure(new IAppender[]
+                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
             }
 
-            var log = LogManager.GetLogger("Main");
+            ILog log = LogManager.GetLogger("Main");
 
             // Arguments
             if (args.Length < 4)
@@ -56,10 +79,10 @@ namespace NPSharp.CommandLine.MOTD
                 return;
             }
 
-            var hostname = args[0];
-            var port = ushort.Parse(args[1]);
-            var username = args[2];
-            var password = args[3];
+            string hostname = args[0];
+            ushort port = ushort.Parse(args[1]);
+            string username = args[2];
+            string password = args[3];
 
             // NP connection setup
             log.DebugFormat("Connecting to {0}:{1}...", hostname, port);
@@ -104,15 +127,13 @@ namespace NPSharp.CommandLine.MOTD
 
             try
             {
-                log.InfoFormat("Server says: {0}", Encoding.UTF8.GetString(np.GetPublisherFile("motd-english.txt").Result));
+                log.InfoFormat("Server says: {0}",
+                    Encoding.UTF8.GetString(np.GetPublisherFile("motd-english.txt").Result));
             }
             catch
             {
                 log.ErrorFormat("Could not read MOTD from NP server.");
             }
-
-
-
         }
     }
 }

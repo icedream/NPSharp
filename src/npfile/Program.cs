@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
@@ -16,12 +17,13 @@ using uhttpsharp.Handlers;
 using uhttpsharp.Headers;
 using uhttpsharp.Listeners;
 using uhttpsharp.RequestProviders;
+using HttpResponse = uhttpsharp.HttpResponse;
 
 namespace NPSharp.CommandLine.File
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // log4net setup
             if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
@@ -35,7 +37,8 @@ namespace NPSharp.CommandLine.File
 #endif
                     Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
                 };
-                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+                BasicConfigurator.Configure(new IAppender[]
+                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
             }
             else
             {
@@ -48,16 +51,38 @@ namespace NPSharp.CommandLine.File
 #endif
                     Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
                 };
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Debug, ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Info, ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Warn, ForeColor = ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Error, ForeColor = ColoredConsoleAppender.Colors.Red | ColoredConsoleAppender.Colors.HighIntensity });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors { Level = Level.Fatal, ForeColor = ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity, BackColor = ColoredConsoleAppender.Colors.Red });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Debug,
+                    ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Info,
+                    ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Warn,
+                    ForeColor = ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Error,
+                    ForeColor = ColoredConsoleAppender.Colors.Red | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Fatal,
+                    ForeColor = ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity,
+                    BackColor = ColoredConsoleAppender.Colors.Red
+                });
                 appender.ActivateOptions();
-                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+                BasicConfigurator.Configure(new IAppender[]
+                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
             }
 
-            var log = LogManager.GetLogger("Main");
+            ILog log = LogManager.GetLogger("Main");
 
             // Arguments
             if (args.Length < 4)
@@ -66,11 +91,11 @@ namespace NPSharp.CommandLine.File
                 return;
             }
 
-            var hostname = args[0];
-            var port = ushort.Parse(args[1]);
-            var username = args[2];
-            var password = args[3];
-            var hport = args.Length > 4 ? ushort.Parse(args[4]) : 5680;
+            string hostname = args[0];
+            ushort port = ushort.Parse(args[1]);
+            string username = args[2];
+            string password = args[3];
+            int hport = args.Length > 4 ? ushort.Parse(args[4]) : 5680;
 
             // NP connection setup
             log.DebugFormat("Connecting to {0}:{1}...", hostname, port);
@@ -112,7 +137,8 @@ namespace NPSharp.CommandLine.File
                     );
                 httpServer.Use(new AnonymousHttpRequestHandler((context, next) =>
                 {
-                    context.Response = new HttpResponse(HttpResponseCode.NotFound, "File not found", context.Request.Headers.KeepAliveConnection());
+                    context.Response = new HttpResponse(HttpResponseCode.NotFound, "File not found",
+                        context.Request.Headers.KeepAliveConnection());
                     return Task.Factory.GetCompleted();
                 }));
                 httpServer.Start();
@@ -126,8 +152,8 @@ namespace NPSharp.CommandLine.File
 
     internal class NP2HTTPUserFileHandler : IHttpRequestHandler
     {
-        private readonly NPClient _np;
         private readonly ILog _log;
+        private readonly NPClient _np;
 
         public NP2HTTPUserFileHandler(NPClient np)
         {
@@ -137,7 +163,9 @@ namespace NPSharp.CommandLine.File
 
         public Task Handle(IHttpContext context, Func<Task> next)
         {
-            var uri = context.Request.QueryString.Any() ? null : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
+            string uri = context.Request.QueryString.Any()
+                ? null
+                : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
             if (uri == null)
                 if (!context.Request.QueryString.TryGetByName("uri", out uri) || uri == null)
                 {
@@ -149,7 +177,7 @@ namespace NPSharp.CommandLine.File
                 }
 
             _log.InfoFormat("Requesting user file {0}", uri);
-            var task = _np.GetUserFile(uri);
+            Task<byte[]> task = _np.GetUserFile(uri);
             try
             {
                 task.Wait();
@@ -158,22 +186,24 @@ namespace NPSharp.CommandLine.File
             {
                 context.Response = HttpResponse.CreateWithMessage(HttpResponseCode.NotFound, "File not accessible",
                     context.Request.Headers.KeepAliveConnection(),
-                    string.Format("<pre><tt><code>{0}</code></tt></pre>", task.Exception == null ? "Unknown error" : task.Exception.ToString())
+                    string.Format("<pre><tt><code>{0}</code></tt></pre>",
+                        task.Exception == null ? "Unknown error" : task.Exception.ToString())
                     );
                 return Task.Factory.GetCompleted();
             }
 
             // Return file contents
-            context.Response = new HttpResponse(HttpResponseCode.Ok, System.Web.MimeMapping.GetMimeMapping(uri), new MemoryStream(task.Result), context.Request.Headers.KeepAliveConnection());
-            
+            context.Response = new HttpResponse(HttpResponseCode.Ok, MimeMapping.GetMimeMapping(uri),
+                new MemoryStream(task.Result), context.Request.Headers.KeepAliveConnection());
+
             return Task.Factory.GetCompleted();
         }
     }
 
     internal class NP2HTTPPublisherFileHandler : IHttpRequestHandler
     {
-        private readonly NPClient _np;
         private readonly ILog _log;
+        private readonly NPClient _np;
 
         public NP2HTTPPublisherFileHandler(NPClient np)
         {
@@ -183,7 +213,9 @@ namespace NPSharp.CommandLine.File
 
         public Task Handle(IHttpContext context, Func<Task> next)
         {
-            var uri = context.Request.QueryString.Any() ? null : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
+            string uri = context.Request.QueryString.Any()
+                ? null
+                : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
             if (uri == null)
                 if (!context.Request.QueryString.TryGetByName("uri", out uri) || uri == null)
                 {
@@ -195,7 +227,7 @@ namespace NPSharp.CommandLine.File
                 }
 
             _log.InfoFormat("Requesting publisher file {0}", uri);
-            var task = _np.GetPublisherFile(uri);
+            Task<byte[]> task = _np.GetPublisherFile(uri);
             try
             {
                 task.Wait();
@@ -204,13 +236,15 @@ namespace NPSharp.CommandLine.File
             {
                 context.Response = HttpResponse.CreateWithMessage(HttpResponseCode.NotFound, "File not accessible",
                     context.Request.Headers.KeepAliveConnection(),
-                    string.Format("<pre><tt><code>{0}</code></tt></pre>", task.Exception == null ? "Unknown error" : task.Exception.ToString())
+                    string.Format("<pre><tt><code>{0}</code></tt></pre>",
+                        task.Exception == null ? "Unknown error" : task.Exception.ToString())
                     );
                 return Task.Factory.GetCompleted();
             }
 
             // Return file contents
-            context.Response = new HttpResponse(HttpResponseCode.Ok, System.Web.MimeMapping.GetMimeMapping(uri), new MemoryStream(task.Result), context.Request.Headers.KeepAliveConnection());
+            context.Response = new HttpResponse(HttpResponseCode.Ok, MimeMapping.GetMimeMapping(uri),
+                new MemoryStream(task.Result), context.Request.Headers.KeepAliveConnection());
 
             return Task.Factory.GetCompleted();
         }

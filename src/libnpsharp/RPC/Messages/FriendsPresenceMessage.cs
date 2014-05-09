@@ -5,7 +5,7 @@ namespace NPSharp.RPC.Messages
 {
     [ProtoContract]
     [Packet(1212)]
-    public sealed class FriendsPresenceMessage
+    public sealed class FriendsPresenceMessage : RPCServerMessage
     {
         internal FriendsPresenceMessage()
         {

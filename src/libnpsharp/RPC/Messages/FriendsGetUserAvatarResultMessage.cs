@@ -6,7 +6,9 @@ namespace NPSharp.RPC.Messages
     [Packet(1215)]
     public sealed class FriendsGetUserAvatarResultMessage : RPCServerMessage
     {
-        internal FriendsGetUserAvatarResultMessage() { }
+        internal FriendsGetUserAvatarResultMessage()
+        {
+        }
 
         [ProtoMember(1)]
         public int Result { get; internal set; }

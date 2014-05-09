@@ -8,7 +8,7 @@ namespace NPSharp.RPC.Messages
     public sealed class FriendsGetProfileDataMessage : RPCClientMessage
     {
         [ProtoMember(1)]
-        public UInt64[] IDs { get; set; }
+        public UInt64[] FriendIDs { get; set; }
 
         [ProtoMember(2)]
         public string ProfileType { get; set; }

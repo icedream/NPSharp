@@ -6,7 +6,9 @@ namespace NPSharp.RPC.Messages
     [ProtoContract]
     public sealed class ProfileDataResult
     {
-        internal ProfileDataResult() { }
+        internal ProfileDataResult()
+        {
+        }
 
         [ProtoMember(1)]
         public UInt64 NPID { get; set; }
