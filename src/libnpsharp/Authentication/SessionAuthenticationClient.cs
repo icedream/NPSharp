@@ -10,19 +10,19 @@ namespace NPSharp.Authentication
     ///     Represents a client which can communicate with an authentication endpoint in order to retrieve session
     ///     information, including tokens for authentication with NP servers.
     /// </summary>
-    public class AuthenticationHelper
+    public class SessionAuthenticationClient
     {
         private readonly string _host;
         private readonly string _path;
         private readonly ushort _port;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="NPSharp.Authentication.AuthenticationHelper" /> class.
+        ///     Initializes a new instance of the <see cref="NPSharp.Authentication.SessionAuthenticationClient" /> class.
         /// </summary>
         /// <param name="host">Hostname of the authentication endpoint.</param>
         /// <param name="port">Port of the authentication endpoint.</param>
         /// <param name="path">Path of the authentication endpoint.</param>
-        public AuthenticationHelper(string host, ushort port = 12003, string path = "/authenticate")
+        public SessionAuthenticationClient(string host, ushort port = 12003, string path = "/authenticate")
         {
             _host = host;
             _port = port;
@@ -74,6 +74,7 @@ namespace NPSharp.Authentication
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
             req.AllowAutoRedirect = true;
+            req.KeepAlive = false;
             using (Stream reqStream = req.GetRequestStream())
             {
                 byte[] buffer = Encoding.UTF8.GetBytes(post);

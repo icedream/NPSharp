@@ -44,17 +44,33 @@ namespace NPSharp.RPC.Messages
                 return null;
             }
 
-            int l = sock.Receive(header);
-            if (l == 0)
+            try
             {
-                Log.Debug("Received 0 bytes");
+                var l = sock.Receive(header);
+                if (l == 0)
+                {
+                    Log.Debug("Received 0 bytes");
+                    return null;
+                }
+                if (l < 16)
+                {
+                    Log.ErrorFormat("Received incomplete header ({0} bytes of 16 wanted bytes)", l);
+                    throw new ProtocolViolationException("Received incomplete header");
+                }
+            }
+            catch (SocketException)
+            {
+                if (sock.Connected)
+                    throw;
                 return null;
             }
-            if (l < 16)
+#if !DEBUG
+            catch (Exception error)
             {
-                Log.ErrorFormat("Received incomplete header ({0} bytes of 16 wanted bytes)", l);
-                throw new ProtocolViolationException("Received incomplete header");
+                Log.Error("Error while reading from network socket", error)
+                return null;
             }
+#endif
 
             uint signature, length, type, mid;
             using (var ms = new MemoryStream(header))

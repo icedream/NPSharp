@@ -1,24 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using NPSharp.Steam;
+using Raven.Abstractions.Data;
+using Raven.Client.Connection;
+using Raven.Client.Linq;
+using Raven.Database;
+using Raven.Database.Linq.PrivateExtensions;
 
-namespace NPSharp.CommandLine.Server
+namespace NPSharp.Authentication
 {
     class DummyAuthenticationHandler : IAuthenticationHandler
     {
-        private uint _userID = 1;
+        // TODO: RavenDB integration
+
+        private uint _userID;
+
+        private DocumentDatabase _db;
+
+        public DummyAuthenticationHandler(DocumentDatabase db)
+        {
+            _db = db;
+        }
 
         public AuthenticationResult AuthenticateUser(NPServerClient client, string username, string password)
         {
             return new AuthenticationResult(new CSteamID()
             {
-                AccountID = _userID++,
-                AccountInstance = 1,
-                AccountType = EAccountType.Individual,
-                AccountUniverse = EUniverse.Public
+                AccountID = _userID++
             });
         }
 
@@ -26,10 +34,7 @@ namespace NPSharp.CommandLine.Server
         {
             return new AuthenticationResult(new CSteamID()
             {
-                AccountID = _userID++,
-                AccountInstance = 1,
-                AccountType = EAccountType.Individual,
-                AccountUniverse = EUniverse.Public
+                AccountID = _userID++
             });
         }
 

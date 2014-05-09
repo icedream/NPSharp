@@ -108,7 +108,7 @@ namespace NPSharp.CommandLine.File
             log.Info("NP connection successful, authenticating...");
 
             // Get session token
-            var ah = new AuthenticationHelper(hostname);
+            var ah = new SessionAuthenticationClient(hostname);
             try
             {
                 ah.Authenticate(username, password);

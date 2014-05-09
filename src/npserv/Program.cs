@@ -5,6 +5,7 @@ using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
 using log4net.Layout;
+using NPSharp.Authentication;
 
 namespace NPSharp.CommandLine.Server
 {
@@ -70,14 +71,28 @@ namespace NPSharp.CommandLine.Server
 
             var log = LogManager.GetLogger("Main");
 
+            log.Info("Now starting authentication server...");
+            var auth = new SessionAuthenticationServer();
+            auth.Authenticating += (user, pw) => new SessionAuthenticationResult()
+            {
+                SessionToken = Guid.NewGuid().ToString("N"),
+                UserID = 1,
+                Success = true,
+                UserMail = "anonymous@localhost",
+                UserName = "anonymous"
+            };
+            auth.Start();
+            log.Info("Authentication server started up successfully.");
+
             log.Info("Now starting NP server...");
             var np = new NPServer(3036)
             {
                 AuthenticationHandler = new DummyAuthenticationHandler(),
+                FileServingHandler = new DummyFileServingHandler()
                 // TODO: Implement the other handlers
             };
             np.Start();
-            log.Info("NP server started up and is now ready.");
+            log.Info("NP server started up successfully.");
 
             Thread.Sleep(Timeout.Infinite);
         }

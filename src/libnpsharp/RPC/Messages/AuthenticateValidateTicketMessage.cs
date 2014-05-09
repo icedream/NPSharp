@@ -3,7 +3,7 @@ using ProtoBuf;
 
 namespace NPSharp.RPC.Messages
 {
-    [Packet(1003)]
+    [Packet(1004)]
     [ProtoContract]
     public sealed class AuthenticateValidateTicketMessage : RPCClientMessage
     {

@@ -94,7 +94,7 @@ namespace NPSharp.CommandLine.MOTD
             }
 
             // Get session token
-            var ah = new AuthenticationHelper(hostname);
+            var ah = new SessionAuthenticationClient(hostname);
             try
             {
                 ah.Authenticate(username, password);

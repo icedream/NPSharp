@@ -212,7 +212,7 @@ namespace NPSharp.Steam
             if (ReferenceEquals(a, b))
                 return true;
 
-            if ((a == null) || (b == null))
+            if (Equals(a, null) || Equals(b, null))
                 return false;
 
             return a.steamid.Data == b.steamid.Data;

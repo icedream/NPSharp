@@ -93,7 +93,7 @@ namespace NPSharp
         /// <summary>
         ///     The handler to use for file requests to this NP server.
         /// </summary>
-        public IFileServingHandler FileHandler { get; set; }
+        public IFileServingHandler FileServingHandler { get; set; }
 
         /// <summary>
         ///     The handler to use for user avatar requests to this NP server.
@@ -366,7 +366,7 @@ namespace NPSharp
 
             client.RPC.AttachHandlerForMessageType<StorageGetPublisherFileMessage>(msg =>
             {
-                if (FileHandler == null)
+                if (FileServingHandler == null)
                 {
                     client.RPC.Send(new StoragePublisherFileMessage
                     {
@@ -391,7 +391,7 @@ namespace NPSharp
                         return;
                     }
 
-                    byte[] data = FileHandler.ReadPublisherFile(client, msg.FileName);
+                    var data = FileServingHandler.ReadPublisherFile(client, msg.FileName);
                     if (data == null)
                     {
                         client.RPC.Send(new StoragePublisherFileMessage
@@ -408,7 +408,8 @@ namespace NPSharp
                     {
                         MessageId = msg.MessageId,
                         Result = 0,
-                        FileName = msg.FileName
+                        FileName = msg.FileName,
+                        FileData = data
                     });
                     _log.DebugFormat("Sent publisher file {0}", msg.FileName);
                 }
@@ -426,7 +427,7 @@ namespace NPSharp
 
             client.RPC.AttachHandlerForMessageType<StorageGetUserFileMessage>(msg =>
             {
-                if (FileHandler == null)
+                if (FileServingHandler == null)
                 {
                     client.RPC.Send(new StorageUserFileMessage
                     {
@@ -452,7 +453,7 @@ namespace NPSharp
                         return;
                     }
 
-                    byte[] data = FileHandler.ReadUserFile(client, msg.FileName);
+                    byte[] data = FileServingHandler.ReadUserFile(client, msg.FileName);
                     if (data == null)
                     {
                         client.RPC.Send(new StorageUserFileMessage
@@ -495,7 +496,7 @@ namespace NPSharp
 
             client.RPC.AttachHandlerForMessageType<StorageWriteUserFileMessage>(msg =>
             {
-                if (FileHandler == null)
+                if (FileServingHandler == null)
                 {
                     client.RPC.Send(new StorageWriteUserFileResultMessage
                     {
@@ -521,7 +522,7 @@ namespace NPSharp
                         return;
                     }
 
-                    FileHandler.WriteUserFile(client, msg.FileName, msg.FileData);
+                    FileServingHandler.WriteUserFile(client, msg.FileName, msg.FileData);
 
                     client.RPC.Send(new StorageWriteUserFileResultMessage
                     {
@@ -552,8 +553,10 @@ namespace NPSharp
             #endregion
 
             _clients.Add(client);
+#if !DEBUG
             try
             {
+#endif
                 _log.Debug("Client connected");
                 OnClientConnected(client);
                 while (true)
@@ -564,6 +567,7 @@ namespace NPSharp
                 }
                 _log.Debug("Client disconnected");
                 OnClientDisconnected(client);
+#if !DEBUG
             }
             catch (Exception error)
             {
@@ -571,6 +575,7 @@ namespace NPSharp
                 client.RPC.Send(new CloseAppMessage {Reason = "Server-side error occurred, try again later."});
                 client.RPC.Close();
             }
+#endif
             _clients.Remove(client);
         }
 
