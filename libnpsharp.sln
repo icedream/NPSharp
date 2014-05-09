@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{587B7B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "npfile", "src\npfile\npfile.csproj", "{19EBF339-E076-4962-A671-5B44A978687D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "npserv", "npserv\npserv.csproj", "{1FF77692-D07C-4131-95AE-21AD2A74CA11}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "npserv", "src\npserv\npserv.csproj", "{1FF77692-D07C-4131-95AE-21AD2A74CA11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
