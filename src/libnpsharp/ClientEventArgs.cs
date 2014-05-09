@@ -4,11 +4,11 @@ namespace NPSharp
 {
     public class ClientEventArgs : EventArgs
     {
-        internal ClientEventArgs(NPServer.NPServerClient client)
+        internal ClientEventArgs(NPServerClient client)
         {
             Client = client;
         }
 
-        public NPServer.NPServerClient Client { get; private set; }
+        public NPServerClient Client { get; private set; }
     }
 }

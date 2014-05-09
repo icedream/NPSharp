@@ -54,10 +54,18 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthenticationResult.cs" />
     <Compile Include="ClientEventArgs.cs" />
+    <Compile Include="ClientEventHandler.cs" />
+    <Compile Include="IAuthenticationHandler.cs" />
+    <Compile Include="IFileServingHandler.cs" />
+    <Compile Include="IFriendsHandler.cs" />
+    <Compile Include="IUserAvatarHandler.cs" />
     <Compile Include="NPClient.cs" />
     <Compile Include="NPFileException.cs" />
     <Compile Include="NPServer.cs" />
+    <Compile Include="NPServerClient.cs" />
+    <Compile Include="PresenceState.cs" />
     <Compile Include="RPC\Messages\AuthenticateRegisterServerMessage.cs" />
     <Compile Include="RPC\Messages\AuthenticateRegisterServerResultMessage.cs" />
     <Compile Include="RPC\Messages\AuthenticateUserGroupMessage.cs" />
@@ -104,6 +112,7 @@
     <Compile Include="Steam\InteropHelp.cs" />
     <Compile Include="Steam\SteamID_t.cs" />
     <Compile Include="Ticket.cs" />
+    <Compile Include="TicketValidationResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Steam\README.txt" />

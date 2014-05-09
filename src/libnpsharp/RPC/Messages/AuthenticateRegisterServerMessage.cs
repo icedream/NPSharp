@@ -6,7 +6,7 @@ namespace NPSharp.RPC.Messages
     [ProtoContract]
     public sealed class AuthenticateRegisterServerMessage : RPCClientMessage
     {
-        [ProtoMember(1, IsRequired=false)]
+        [ProtoMember(1, IsRequired = false)]
         public string ConfigPath { get; set; }
     }
 }

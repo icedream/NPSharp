@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Configuration;
+using System.Net;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using log4net;
 using NPSharp.RPC;
 using NPSharp.RPC.Messages;
@@ -12,34 +15,118 @@ namespace NPSharp
 {
     public class NPServer
     {
-        public delegate void ClientEventHandler(object sender, ClientEventArgs args);
-
-        public IFileServingHandler FileHandler { get; set; }
-
-        public IUserAvatarHandler UserAvatarHandler { get; set; }
-
-        public interface IUserAvatarHandler
-        {
-            byte[] GetUserAvatar(CSteamID id);
-
-            byte[] GetDefaultAvatar();
-        }
-
         private readonly List<NPServerClient> _clients;
         private readonly ILog _log;
+        private readonly Socket _socket;
+        private readonly ushort _port;
 
-        public NPServer()
+        /// <summary>
+        ///     Constructs a new NP server.
+        /// </summary>
+        public NPServer(ushort port = 3025)
         {
             _log = LogManager.GetLogger("NPServer");
             _clients = new List<NPServerClient>();
+
+            _socket = new Socket(SocketType.Stream, ProtocolType.IP);
+            _port = port;
         }
 
-        private void _handleClient(NPServerClient client)
+        /// <summary>
+        ///     Starts up the NP server.
+        /// </summary>
+        public void Start()
         {
+            if (_socket.IsBound)
+                throw new InvalidOperationException("This server is already running");
+
+            try
+            {
+                // ReSharper disable once ObjectCreationAsStatement
+                // TODO: fix this shit permission code
+                new SocketPermission(NetworkAccess.Accept, TransportType.Tcp, "", _port);
+            }
+            catch
+            {
+                _log.Error("Socket permission request failed, can't start server.");
+                throw new SocketException(10013 /* Permission denied */);
+            }
+
+            _socket.Bind(new IPEndPoint(IPAddress.IPv6Any, _port));
+            _socket.Listen(4);
+
+            Task.Factory.StartNew(() =>
+            {
+                _log.Debug("Listener loop started");
+                var allDone = new ManualResetEvent(false);
+                while (_socket != null && _socket.IsBound)
+                {
+                    allDone.Reset();
+                    _socket.BeginAccept(ar =>
+                    {
+                        _log.Debug("Async accept client start");
+                        allDone.Set();
+
+                        var serverSocket = (Socket) ar.AsyncState;
+                        var clientSocket = serverSocket.EndAccept(ar);
+
+                        var npsc = new NPServerClient(this, new RPCServerStream(clientSocket));
+
+                        _log.Debug("Async accept client end"); 
+                        
+                        _handleClient(npsc);
+                    }, _socket);
+                    allDone.WaitOne();
+                }
+                _log.Debug("Listener loop shut down");
+            });
+        }
+
+        /// <summary>
+        ///     Shuts down all connections and stops the NP server.
+        /// </summary>
+        public void Stop()
+        {
+            _socket.Shutdown(SocketShutdown.Both);
+        }
+
+        /// <summary>
+        ///     The handler to use for file requests to this NP server.
+        /// </summary>
+        public IFileServingHandler FileHandler { get; set; }
+
+        /// <summary>
+        ///     The handler to use for user avatar requests to this NP server.
+        /// </summary>
+        public IUserAvatarHandler UserAvatarHandler { get; set; }
+
+        /// <summary>
+        ///     Returns all currently connected clients
+        /// </summary>
+        public NPServerClient[] Clients
+        {
+            get { return _clients.ToArray(); } // Avoid race condition by IEnum changes
+        }
+
+        /// <summary>
+        ///     The handler to use for authentication requests to this NP server.
+        /// </summary>
+        public IAuthenticationHandler AuthenticationHandler { get; set; }
+
+        /// <summary>
+        ///     The handler to use for friends-related requests to this NP server.
+        /// </summary>
+        public IFriendsHandler FriendsHandler { get; set; }
+
+        internal void _handleClient(NPServerClient client)
+        {
+            _log.Debug("Client now being handled"); 
+
             #region RPC authentication message handlers
+
             client.RPC.AttachHandlerForMessageType<AuthenticateWithKeyMessage>(msg =>
             {
-                var result = new AuthenticationResult();;
+                var result = new AuthenticationResult();
                 if (AuthenticationHandler != null)
                 {
                     try
@@ -109,11 +196,11 @@ namespace NPSharp
                 client.UserID = result.UserID;
 
                 // Send "online" notification to all friends of this player
-                foreach (var fconn in client.FriendConnections)
+                foreach (NPServerClient fconn in client.FriendConnections)
                 {
                     fconn.RPC.Send(new FriendsPresenceMessage
                     {
-                        CurrentServer = client.DedicatedServer == null ? 0 : client.DedicatedServer.NPID,
+                        CurrentServer = client.DedicatedServer == null ? 0 : client.DedicatedServer.UserID,
                         Friend = client.UserID,
                         Presence = client.PresenceData,
                         PresenceState = client.DedicatedServer == null ? 1 : 2
@@ -157,7 +244,7 @@ namespace NPSharp
                 client.UserID = result.UserID;
 
                 // Send "online" notification to all friends of this player
-                foreach (var fconn in client.FriendConnections)
+                foreach (NPServerClient fconn in client.FriendConnections)
                 {
                     fconn.RPC.Send(new FriendsPresenceMessage
                     {
@@ -185,7 +272,6 @@ namespace NPSharp
 
                         _log.DebugFormat("Ticket[Version={0},ServerID={1},Time={2}]", ticketData.Version,
                             ticketData.ServerID, ticketData.Time);
-
                     }
                     catch (ArgumentException error)
                     {
@@ -198,7 +284,9 @@ namespace NPSharp
                         {
                             if (ticketData.ClientID == client.UserID) // NPID enforcement
                             {
-                                var s = _clients.Where(c => c.IsServer && !c.IsDirty && c.UserID == ticketData.ServerID).ToArray();
+                                var s =
+                                    _clients.Where(c => c.IsServer && !c.IsDirty && c.UserID == ticketData.ServerID)
+                                        .ToArray();
 
                                 if (s.Any())
                                 {
@@ -236,12 +324,14 @@ namespace NPSharp
                     Result = validTicket ? 0 : 1
                 });
             });
+
             #endregion
 
             #region RPC friend message handlers
+
             client.RPC.AttachHandlerForMessageType<FriendsSetPresenceMessage>(msg =>
             {
-                foreach (var pdata in msg.Presence)
+                foreach (FriendsPresence pdata in msg.Presence)
                 {
                     client.SetPresence(pdata.Key, pdata.Value);
                     _log.DebugFormat("Client says presence \"{0}\" is \"{1}\"", pdata.Key, pdata.Value);
@@ -252,10 +342,10 @@ namespace NPSharp
             {
                 // Why so goddamn complicated, NTA. Fuck.
                 // TODO: Not compatible with non-public accounts
-                var npid = new CSteamID((uint) msg.Guid, EUniverse.Public,
+                ulong npid = new CSteamID((uint) msg.Guid, EUniverse.Public,
                     EAccountType.Individual).ConvertToUint64();
 
-                var avatar = UserAvatarHandler.GetUserAvatar(npid) ?? UserAvatarHandler.GetDefaultAvatar();
+                byte[] avatar = UserAvatarHandler.GetUserAvatar(npid) ?? UserAvatarHandler.GetDefaultAvatar();
 
                 client.RPC.Send(new FriendsGetUserAvatarResultMessage
                 {
@@ -269,11 +359,197 @@ namespace NPSharp
             {
                 // TODO
             });
+
             #endregion
 
-            // TODO: RPC message handling for storage
+            #region RPC storage message handlers
+
+            client.RPC.AttachHandlerForMessageType<StorageGetPublisherFileMessage>(msg =>
+            {
+                if (FileHandler == null)
+                {
+                    client.RPC.Send(new StoragePublisherFileMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 2,
+                        FileName = msg.FileName
+                    });
+                    return;
+                }
+
+                try
+                {
+                    if (client.UserID == null)
+                    {
+                        client.RPC.Send(new StoragePublisherFileMessage
+                        {
+                            MessageId = msg.MessageId,
+                            Result = 2,
+                            FileName = msg.FileName
+                        });
+                        _log.WarnFormat("Client tried to read publisher file {0} while not logged in", msg.FileName);
+                        return;
+                    }
+
+                    byte[] data = FileHandler.ReadPublisherFile(client, msg.FileName);
+                    if (data == null)
+                    {
+                        client.RPC.Send(new StoragePublisherFileMessage
+                        {
+                            MessageId = msg.MessageId,
+                            Result = 1,
+                            FileName = msg.FileName
+                        });
+                        _log.DebugFormat("Could not open publisher file {0}", msg.FileName);
+                        return;
+                    }
+
+                    client.RPC.Send(new StoragePublisherFileMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 0,
+                        FileName = msg.FileName
+                    });
+                    _log.DebugFormat("Sent publisher file {0}", msg.FileName);
+                }
+                catch (Exception error)
+                {
+                    _log.Warn("GetPublisherFile handler error", error);
+                    client.RPC.Send(new StoragePublisherFileMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 2,
+                        FileName = msg.FileName
+                    });
+                }
+            });
+
+            client.RPC.AttachHandlerForMessageType<StorageGetUserFileMessage>(msg =>
+            {
+                if (FileHandler == null)
+                {
+                    client.RPC.Send(new StorageUserFileMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 2,
+                        FileName = msg.FileName
+                    });
+                    return;
+                }
+
+                try
+                {
+                    if (client.UserID == null)
+                    {
+                        client.RPC.Send(new StorageUserFileMessage
+                        {
+                            MessageId = msg.MessageId,
+                            Result = 2,
+                            FileName = msg.FileName,
+                            NPID = client.UserID
+                        });
+                        _log.WarnFormat("Client tried to read user file {0} while not logged in", msg.FileName);
+                        return;
+                    }
+
+                    byte[] data = FileHandler.ReadUserFile(client, msg.FileName);
+                    if (data == null)
+                    {
+                        client.RPC.Send(new StorageUserFileMessage
+                        {
+                            MessageId = msg.MessageId,
+                            Result = 1,
+                            FileName = msg.FileName,
+                            NPID = client.UserID
+                        });
+                        _log.DebugFormat("Could not open user file {0}", msg.FileName);
+                        return;
+                    }
+
+                    client.RPC.Send(new StorageUserFileMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 0,
+                        FileName = msg.FileName,
+                        FileData = data,
+                        NPID = client.UserID
+                    });
+                    _log.DebugFormat("Sent user file {0}", msg.FileName);
+                }
+                catch (Exception error)
+                {
+                    _log.Warn("GetUserFile handler error", error);
+                    client.RPC.Send(new StorageUserFileMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 2,
+                        FileName = msg.FileName
+                    });
+                }
+            });
+
+            client.RPC.AttachHandlerForMessageType<StorageSendRandomStringMessage>(msg =>
+            {
+                // TODO: Handle "random string" messages
+            });
+
+            client.RPC.AttachHandlerForMessageType<StorageWriteUserFileMessage>(msg =>
+            {
+                if (FileHandler == null)
+                {
+                    client.RPC.Send(new StorageWriteUserFileResultMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 2,
+                        FileName = msg.FileName
+                    });
+                    return;
+                }
+
+                try
+                {
+                    if (client.UserID == null)
+                    {
+                        client.RPC.Send(new StorageWriteUserFileResultMessage
+                        {
+                            MessageId = msg.MessageId,
+                            Result = 2,
+                            FileName = msg.FileName,
+                            NPID = client.UserID
+                        });
+                        _log.WarnFormat("Client tried to write user file {0} while not logged in", msg.FileName);
+                        return;
+                    }
+
+                    FileHandler.WriteUserFile(client, msg.FileName, msg.FileData);
+
+                    client.RPC.Send(new StorageWriteUserFileResultMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 0,
+                        FileName = msg.FileName,
+                        NPID = client.UserID
+                    });
+                    _log.DebugFormat("Received and wrote user file {0}", msg.FileName);
+                }
+                catch (Exception error)
+                {
+                    _log.Warn("WriteUserFile handler error", error);
+                    client.RPC.Send(new StorageWriteUserFileResultMessage
+                    {
+                        MessageId = msg.MessageId,
+                        Result = 2,
+                        FileName = msg.FileName
+                    });
+                }
+            });
             // TODO: RPC message handling for MessagingSendData
-            // TODO: RPC message handling for server sessions
+
+            #endregion
+
+            #region RPC server session message handler
+
+            #endregion
 
             _clients.Add(client);
             try
@@ -292,129 +568,21 @@ namespace NPSharp
             catch (Exception error)
             {
                 _log.Error("Error in client handling loop", error);
-                client.RPC.Send(new CloseAppMessage{Reason="Server-side error occurred, try again later."});
+                client.RPC.Send(new CloseAppMessage {Reason = "Server-side error occurred, try again later."});
                 client.RPC.Close();
             }
             _clients.Remove(client);
         }
 
-        public NPServerClient[] Clients
-        {
-            get { return _clients.ToArray(); } // Avoid race condition by IEnum changes
-        }
-
-        public interface IFileServingHandler
-        {
-            Stream ReadUserFile(NPServerClient client, string file);
-
-            Stream ReadPublisherFile(NPServerClient client, string file);
-        }
-
-        public IAuthenticationHandler AuthenticationHandler { get; set; }
-
-        public interface IAuthenticationHandler
-        {
-            AuthenticationResult AuthenticateUser(NPServerClient client, string username, string password);
-
-            AuthenticationResult AuthenticateUser(NPServerClient client, string token);
-
-            AuthenticationResult AuthenticateServer(NPServerClient client, string licenseKey);
-
-            TicketValidationResult ValidateTicket(NPServerClient client, NPServerClient server);
-        }
-
-        public class AuthenticationResult
-        {
-            /// <summary>
-            /// Constructs an authentication result instance.
-            /// </summary>
-            /// <param name="npid">Set this to null if authentication should fail, otherwise use an instance of a steam ID which is unique to the user.</param>
-            public AuthenticationResult(CSteamID npid = null)
-            {
-                UserID = npid;
-            }
-
-            public bool Result { get { return UserID != null; } }
-
-            public CSteamID UserID { get; private set; }
-        }
-
-        public enum TicketValidationResult
-        {
-            Valid = 0,
-            Invalid = 1
-        }
-
-        public IFriendsHandler FriendsHandler { get; set; }
-
-        public interface IFriendsHandler
-        {
-            IEnumerable<FriendDetails> GetFriends(NPServerClient client);
-
-            /*
-            void SetFriendStatus(NPServerClient client, PresenceState presenceState,
-                Dictionary<string, string> presenceData, ulong serverID)
-            {
-                
-            }
-             */
-        }
-
-        public class NPServerClient
-        {
-            internal NPServerClient(NPServer np, RPCServerStream rpcclient)
-            {
-                NP = np;
-                RPC = rpcclient;
-            }
-
-            internal readonly RPCServerStream RPC;
-
-            internal readonly NPServer NP;
-
-            public CSteamID UserID { get; internal set; }
-
-            public IEnumerable<FriendDetails> Friends
-            {
-                get { return NP.FriendsHandler.GetFriends(this).ToArray(); }
-            }
-
-            public IEnumerable<NPServerClient> FriendConnections
-            {
-                get { return NP.Clients.Where(c => Friends.Any(f => f.NPID == c.NPID)); }
-            }
-
-            internal NPServerClient DedicatedServer;
-
-            private readonly Dictionary<string, string> _presence = new Dictionary<string, string>();
-
-            public FriendsPresence[] PresenceData { get
-            {
-                return _presence.Select(i => new FriendsPresence {Key = i.Key, Value = i.Value}).ToArray();
-            } }
-
-            public bool IsServer { get; set; }
-            public bool IsDirty { get; set; }
-            public int GroupID { get; set; }
-
-            internal void SetPresence(string key, string value)
-            {
-                if (!_presence.ContainsKey(key))
-                    _presence.Add(key, value);
-                else
-                    _presence[key] = value;
-            }
-        }
-
-        public enum PresenceState
-        {
-            Offline = 0,
-            Online = 1,
-            Playing = 2
-        }
-
+        /// <summary>
+        ///     Triggered when a client has connected but is not authenticating yet.
+        /// </summary>
         public event ClientEventHandler ClientConnected;
 
+        /// <summary>
+        ///     Invokes the <see cref="ClientConnected" /> event.
+        /// </summary>
+        /// <param name="client">The client</param>
         protected virtual void OnClientConnected(NPServerClient client)
         {
             var handler = ClientConnected;
@@ -422,8 +590,15 @@ namespace NPSharp
             if (handler != null) handler(this, args);
         }
 
+        /// <summary>
+        ///     Triggered when a client has disconnected.
+        /// </summary>
         public event ClientEventHandler ClientDisconnected;
 
+        /// <summary>
+        ///     Invokes the <see cref="ClientDisconnected" /> event.
+        /// </summary>
+        /// <param name="client">The client</param>
         protected virtual void OnClientDisconnected(NPServerClient client)
         {
             var handler = ClientDisconnected;
@@ -431,8 +606,15 @@ namespace NPSharp
             if (handler != null) handler(this, args);
         }
 
+        /// <summary>
+        ///     Triggered when a client has authenticated successfully.
+        /// </summary>
         public event ClientEventHandler ClientAuthenticated;
 
+        /// <summary>
+        ///     Invokes the <see cref="ClientAuthenticated" /> event.
+        /// </summary>
+        /// <param name="client">The client</param>
         protected virtual void OnClientAuthenticated(NPServerClient client)
         {
             var handler = ClientAuthenticated;

@@ -174,7 +174,9 @@ namespace NPSharp.Steam
             {
                 case EAccountType.Invalid:
                 case EAccountType.Individual:
-                    return AccountUniverse <= EUniverse.Public ? String.Format("STEAM_0:{0}:{1}", AccountID & 1, AccountID >> 1) : String.Format("STEAM_{2}:{0}:{1}", AccountID & 1, AccountID >> 1, (int) AccountUniverse);
+                    return AccountUniverse <= EUniverse.Public
+                        ? String.Format("STEAM_0:{0}:{1}", AccountID & 1, AccountID >> 1)
+                        : String.Format("STEAM_{2}:{0}:{1}", AccountID & 1, AccountID >> 1, (int) AccountUniverse);
                 default:
                     return Convert.ToString(this);
             }

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -33,7 +34,9 @@ namespace NPSharp.RPC.Messages
         {
             var header = new byte[4*sizeof (uint)];
 
-            while (sock.Connected && !sock.Poll(1000, SelectMode.SelectRead)) { }
+            while (sock.Connected && !sock.Poll(1000, SelectMode.SelectRead))
+            {
+            }
 
             if (!sock.Connected)
             {
@@ -41,7 +44,7 @@ namespace NPSharp.RPC.Messages
                 return null;
             }
 
-            var l = sock.Receive(header);
+            int l = sock.Receive(header);
             if (l == 0)
             {
                 Log.Debug("Received 0 bytes");
@@ -53,7 +56,7 @@ namespace NPSharp.RPC.Messages
                 throw new ProtocolViolationException("Received incomplete header");
             }
 
-            uint signature, length, type, pid;
+            uint signature, length, type, mid;
             using (var ms = new MemoryStream(header))
             {
                 using (var br = new BinaryReader(ms))
@@ -61,7 +64,7 @@ namespace NPSharp.RPC.Messages
                     signature = br.ReadUInt32();
                     length = br.ReadUInt32();
                     type = br.ReadUInt32();
-                    pid = br.ReadUInt32();
+                    mid = br.ReadUInt32();
                 }
             }
 
@@ -74,11 +77,11 @@ namespace NPSharp.RPC.Messages
                 throw new ProtocolViolationException("Received packet with invalid signature");
             }
 
-            T packet;
+            T message;
 
             using (var ms = new MemoryStream(buffer))
             {
-                var types = Assembly.GetExecutingAssembly().GetTypes().Where(
+                Type[] types = Assembly.GetExecutingAssembly().GetTypes().Where(
                     t =>
                         t.IsSubclassOf(typeof (T))
                         &&
@@ -96,27 +99,27 @@ namespace NPSharp.RPC.Messages
                     return null;
 #endif
                 }
-                packet = (T) Serializer.NonGeneric.Deserialize(
+                message = (T) Serializer.NonGeneric.Deserialize(
                     types.Single(),
                     ms
                     );
             }
 
-            packet.MessageId = pid;
+            message.MessageId = mid;
 
 #if DEBUG
-            Log.DebugFormat("{3}[ID={0},Type={1},TypeName={2}] {{", pid, packet.GetTypeId(), packet.GetType().Name,
+            Log.DebugFormat("{3}[ID={0},Type={1},TypeName={2}] {{", mid, message.GetTypeId(), message.GetType().Name,
                 typeof (T).Name);
             foreach (
-                var prop in
-                    packet.GetType().GetProperties().Where(p => !(p.DeclaringType == typeof (RPCServerMessage))))
+                PropertyInfo prop in
+                    message.GetType().GetProperties().Where(p => !(p.DeclaringType == typeof (RPCServerMessage))))
             {
-                Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(packet));
+                Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(message));
             }
             Log.DebugFormat("}} // deserialized from {0} bytes", header.Length + buffer.Length);
 #endif
 
-            return packet;
+            return message;
         }
 
         public byte[] Serialize()
@@ -149,7 +152,7 @@ namespace NPSharp.RPC.Messages
 #if DEBUG
             Log.DebugFormat("{3}[ID={0},Type={1},TypeName={2}] {{", MessageId, GetTypeId(), GetType().Name,
                 GetType().Name);
-            foreach (var prop in GetType().GetProperties())
+            foreach (PropertyInfo prop in GetType().GetProperties())
             {
                 Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(this));
             }

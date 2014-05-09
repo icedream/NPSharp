@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using log4net.Appender;
 
 namespace NPSharp
 {
@@ -12,7 +7,7 @@ namespace NPSharp
     {
         public Ticket(byte[] data)
         {
-            if (data.Length < sizeof(uint) + (sizeof(ulong) * 2) + sizeof(uint))
+            if (data.Length < sizeof (uint) + (sizeof (ulong)*2) + sizeof (uint))
             {
                 throw new ArgumentException("Data buffer too short");
             }

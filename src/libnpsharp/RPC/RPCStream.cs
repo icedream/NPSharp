@@ -100,7 +100,7 @@ namespace NPSharp.RPC
             TypeCallbacks.Add(
                 new KeyValuePair<uint, Action<TRecv>>(
                     ((PacketAttribute) typeof (T).GetCustomAttributes(typeof (PacketAttribute), false).Single()).Type,
-                    (Action<TRecv>)callback));
+                    msg => callback.Invoke((T)msg)));
         }
 
         /// <summary>
@@ -131,13 +131,15 @@ namespace NPSharp.RPC
             if (_sock == null)
                 throw new InvalidOperationException("You need to open the stream first.");
 
-            message.MessageId = MessageID;
+            if (message.MessageId == default(uint))
+                message.MessageId = MessageID;
 
-            var buffer = message.Serialize();
+            byte[] buffer = message.Serialize();
 
             _sock.Send(buffer);
 
-            IterateMessageID();
+            if (typeof (TSend) == typeof (RPCClientMessage))
+                IterateMessageID();
         }
 
         /// <summary>
@@ -155,6 +157,9 @@ namespace NPSharp.RPC
             {
                 return null;
             }
+
+            if (typeof (TRecv) == typeof (RPCClientMessage))
+                MessageID = message.MessageId;
 
             // Callbacks
             foreach (var cbi in IDCallbacks.Where(p => p.Key == message.MessageId))

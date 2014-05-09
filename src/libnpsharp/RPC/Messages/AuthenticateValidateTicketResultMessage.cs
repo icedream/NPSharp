@@ -10,7 +10,7 @@ namespace NPSharp.RPC.Messages
         [ProtoMember(1)]
         public int Result { get; set; }
 
-        [ProtoMember(2, DataFormat=DataFormat.FixedSize)]
+        [ProtoMember(2, DataFormat = DataFormat.FixedSize)]
         public UInt64 NPID { get; set; }
 
         [ProtoMember(3)]
