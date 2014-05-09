@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Security.Authentication;
 using System.Text;
 using System.Text.RegularExpressions;
+using log4net;
 
 namespace NPSharp.Authentication
 {
@@ -15,6 +17,7 @@ namespace NPSharp.Authentication
         private readonly string _host;
         private readonly string _path;
         private readonly ushort _port;
+        private readonly ILog _log;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="NPSharp.Authentication.SessionAuthenticationClient" /> class.
@@ -27,6 +30,7 @@ namespace NPSharp.Authentication
             _host = host;
             _port = port;
             _path = path;
+            _log = LogManager.GetLogger("AuthClient");
         }
 
         /// <summary>
@@ -60,9 +64,24 @@ namespace NPSharp.Authentication
         /// <param name="password">The password to use for authentication.</param>
         public void Authenticate(string username, string password)
         {
-            string post = string.Format("{0}&&{1}", username, password);
+            _log.Debug("Authentication running...");
+            try
+            {
+                AuthenticateUsingNewFormat(username, password);
+            }
+            catch (InvalidCredentialException)
+            {
+                _log.Debug("Trying login again using old format");
+                AuthenticateUsingOldFormat(username, password);
+            }
+            _log.Debug("Authentication successful.");
+        }
 
-            Uri uri = new UriBuilder
+        protected void AuthenticateUsingNewFormat(string username, string password)
+        {
+            var post = string.Format("user={0}&pass={1}", Uri.EscapeDataString(username), Uri.EscapeDataString(password));
+
+            var uri = new UriBuilder
             {
                 Scheme = "http",
                 Port = _port,
@@ -70,14 +89,14 @@ namespace NPSharp.Authentication
                 Path = _path
             }.Uri;
 
-            var req = (HttpWebRequest) WebRequest.Create(uri);
+            var req = (HttpWebRequest)WebRequest.Create(uri);
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
             req.AllowAutoRedirect = true;
-            req.KeepAlive = false;
-            using (Stream reqStream = req.GetRequestStream())
+            req.KeepAlive = true;
+            using (var reqStream = req.GetRequestStream())
             {
-                byte[] buffer = Encoding.UTF8.GetBytes(post);
+                var buffer = Encoding.UTF8.GetBytes(post);
                 reqStream.Write(buffer, 0, post.Length);
                 reqStream.Flush();
             }
@@ -87,8 +106,8 @@ namespace NPSharp.Authentication
             var rx =
                 new Regex(
                     "^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>[^#]+)[#]*$");
-            var resp = (HttpWebResponse) req.GetResponse();
-            using (Stream respStream = resp.GetResponseStream())
+            var resp = (HttpWebResponse)req.GetResponse();
+            using (var respStream = resp.GetResponseStream())
             {
                 if (respStream == null)
                     throw new Exception(@"No answer from server");
@@ -96,7 +115,7 @@ namespace NPSharp.Authentication
                 {
                     while (!respReader.EndOfStream)
                     {
-                        string line = respReader.ReadLine();
+                        var line = respReader.ReadLine();
 
                         // No answer?
                         if (string.IsNullOrEmpty(line))
@@ -107,20 +126,97 @@ namespace NPSharp.Authentication
                             continue;
 
                         // This is a DW response line, analyze
-                        Match rxm = rx.Match(line);
+                        var rxm = rx.Match(line);
 
                         // Login succeeded?
                         if (rxm.Groups["status"].Value != "ok")
-                            throw new Exception(rxm.Groups["text"].Value);
+                        {
+                            throw new InvalidCredentialException(rxm.Groups["text"].Value);
+                        }
 
                         // Store all data
                         Username = rxm.Groups["username"].Value;
                         UserEMail = rxm.Groups["usermail"].Value;
                         SessionToken = rxm.Groups["sessiontoken"].Value;
                         UserId = uint.Parse(rxm.Groups["userid"].Value);
+
+                        return;
                     }
                 }
             }
+
+            throw new Exception("This is not an authentication server");
+        }
+
+        protected void AuthenticateUsingOldFormat(string username, string password)
+        {
+            var post = string.Format("{0}&&{1}", username, password);
+
+            var uri = new UriBuilder
+            {
+                Scheme = "http",
+                Port = _port,
+                Host = _host,
+                Path = _path
+            }.Uri;
+
+            var req = (HttpWebRequest)WebRequest.Create(uri);
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.AllowAutoRedirect = true;
+            req.KeepAlive = false;
+            using (var reqStream = req.GetRequestStream())
+            {
+                var buffer = Encoding.UTF8.GetBytes(post);
+                reqStream.Write(buffer, 0, post.Length);
+                reqStream.Flush();
+            }
+
+            // Response will be in this syntax:
+            // (ok|fail)#text#userid#username#email#sessiontoken
+            var rx =
+                new Regex(
+                    "^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>[^#]+)[#]*$");
+            var resp = (HttpWebResponse)req.GetResponse();
+            using (var respStream = resp.GetResponseStream())
+            {
+                if (respStream == null)
+                    throw new Exception(@"No answer from server");
+                using (var respReader = new StreamReader(respStream))
+                {
+                    while (!respReader.EndOfStream)
+                    {
+                        var line = respReader.ReadLine();
+
+                        // No answer?
+                        if (string.IsNullOrEmpty(line))
+                            continue;
+
+                        // DW response line found?
+                        if (!rx.IsMatch(line))
+                            continue;
+
+                        // This is a DW response line, analyze
+                        var rxm = rx.Match(line);
+
+                        // Login succeeded?
+                        if (rxm.Groups["status"].Value != "ok")
+                        {
+                            throw new InvalidCredentialException(rxm.Groups["text"].Value);
+                        }
+
+                        // Store all data
+                        Username = rxm.Groups["username"].Value;
+                        UserEMail = rxm.Groups["usermail"].Value;
+                        SessionToken = rxm.Groups["sessiontoken"].Value;
+                        UserId = uint.Parse(rxm.Groups["userid"].Value);
+
+                        return;
+                    }
+                }
+            }
+
+            throw new Exception("This is not an authentication server");
         }
     }
 }

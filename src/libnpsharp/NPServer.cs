@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
@@ -196,7 +195,7 @@ namespace NPSharp
                 client.UserID = result.UserID;
 
                 // Send "online" notification to all friends of this player
-                foreach (NPServerClient fconn in client.FriendConnections)
+                foreach (var fconn in client.FriendConnections)
                 {
                     fconn.RPC.Send(new FriendsPresenceMessage
                     {
@@ -206,6 +205,12 @@ namespace NPSharp
                         PresenceState = client.DedicatedServer == null ? 1 : 2
                     });
                 }
+
+                // Send friends roster to player
+                client.RPC.Send(new FriendsRosterMessage
+                {
+                    Friends = client.Friends.ToArray()
+                });
 
                 OnClientAuthenticated(client);
             });
@@ -244,7 +249,7 @@ namespace NPSharp
                 client.UserID = result.UserID;
 
                 // Send "online" notification to all friends of this player
-                foreach (NPServerClient fconn in client.FriendConnections)
+                foreach (var fconn in client.FriendConnections)
                 {
                     fconn.RPC.Send(new FriendsPresenceMessage
                     {
@@ -254,6 +259,12 @@ namespace NPSharp
                         PresenceState = client.DedicatedServer == null ? 1 : 2
                     });
                 }
+
+                // Send friends roster to player
+                client.RPC.Send(new FriendsRosterMessage
+                {
+                    Friends = client.Friends.ToArray()
+                });
 
                 OnClientAuthenticated(client);
             });
@@ -331,7 +342,7 @@ namespace NPSharp
 
             client.RPC.AttachHandlerForMessageType<FriendsSetPresenceMessage>(msg =>
             {
-                foreach (FriendsPresence pdata in msg.Presence)
+                foreach (var pdata in msg.Presence)
                 {
                     client.SetPresence(pdata.Key, pdata.Value);
                     _log.DebugFormat("Client says presence \"{0}\" is \"{1}\"", pdata.Key, pdata.Value);
