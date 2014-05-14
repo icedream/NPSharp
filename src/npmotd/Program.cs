@@ -79,10 +79,10 @@ namespace NPSharp.CommandLine.MOTD
                 return;
             }
 
-            string hostname = args[0];
-            ushort port = ushort.Parse(args[1]);
-            string username = args[2];
-            string password = args[3];
+            var hostname = args[0];
+            var port = ushort.Parse(args[1]);
+            var username = args[2];
+            var password = args[3];
 
             // NP connection setup
             log.DebugFormat("Connecting to {0}:{1}...", hostname, port);
@@ -129,6 +129,7 @@ namespace NPSharp.CommandLine.MOTD
             {
                 log.InfoFormat("Server says: {0}",
                     Encoding.UTF8.GetString(np.GetPublisherFile("motd-english.txt").Result));
+                np.Disconnect();
             }
             catch
             {
