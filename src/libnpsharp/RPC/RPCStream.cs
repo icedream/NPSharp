@@ -149,7 +149,7 @@ namespace NPSharp.RPC
         public TRecv Read()
         {
             if (_sock == null)
-                throw new InvalidOperationException("You need to open the stream first.");
+                return null;
 
             var message = RPCMessage.Deserialize<TRecv>(_sock);
 
