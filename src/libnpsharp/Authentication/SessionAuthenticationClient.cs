@@ -15,9 +15,9 @@ namespace NPSharp.Authentication
     public class SessionAuthenticationClient
     {
         private readonly string _host;
+        private readonly ILog _log;
         private readonly string _path;
         private readonly ushort _port;
-        private readonly ILog _log;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="NPSharp.Authentication.SessionAuthenticationClient" /> class.
@@ -89,7 +89,7 @@ namespace NPSharp.Authentication
                 Path = _path
             }.Uri;
 
-            var req = (HttpWebRequest)WebRequest.Create(uri);
+            var req = (HttpWebRequest) WebRequest.Create(uri);
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
             req.AllowAutoRedirect = true;
@@ -105,8 +105,8 @@ namespace NPSharp.Authentication
             // (ok|fail)#text#userid#username#email#sessiontoken
             var rx =
                 new Regex(
-                    "^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>[^#]+)[#]*$");
-            var resp = (HttpWebResponse)req.GetResponse();
+                    "^(?<status>ok|fail)#(?<text>[^#]+)#(?<userid>[0-9]+)#(?<username>[^#]*)#(?<usermail>[^#]*)#(?<sessiontoken>[^#]*)[#]*$");
+            var resp = (HttpWebResponse) req.GetResponse();
             using (var respStream = resp.GetResponseStream())
             {
                 if (respStream == null)
@@ -116,6 +116,7 @@ namespace NPSharp.Authentication
                     while (!respReader.EndOfStream)
                     {
                         var line = respReader.ReadLine();
+                        _log.DebugFormat("Received authentication response: {0}", line);
 
                         // No answer?
                         if (string.IsNullOrEmpty(line))
@@ -123,7 +124,10 @@ namespace NPSharp.Authentication
 
                         // DW response line found?
                         if (!rx.IsMatch(line))
+                        {
+                            _log.WarnFormat("Extra data in authentication response: {0}", line);
                             continue;
+                        }
 
                         // This is a DW response line, analyze
                         var rxm = rx.Match(line);
@@ -160,7 +164,7 @@ namespace NPSharp.Authentication
                 Path = _path
             }.Uri;
 
-            var req = (HttpWebRequest)WebRequest.Create(uri);
+            var req = (HttpWebRequest) WebRequest.Create(uri);
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
             req.AllowAutoRedirect = true;
@@ -177,7 +181,7 @@ namespace NPSharp.Authentication
             var rx =
                 new Regex(
                     "^(?<status>ok|fail)#(?<text>.+)#(?<userid>[0-9]+)#(?<username>.+)#(?<usermail>.+)#(?<sessiontoken>[^#]+)[#]*$");
-            var resp = (HttpWebResponse)req.GetResponse();
+            var resp = (HttpWebResponse) req.GetResponse();
             using (var respStream = resp.GetResponseStream())
             {
                 if (respStream == null)

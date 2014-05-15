@@ -13,7 +13,8 @@ using uhttpsharp.RequestProviders;
 namespace NPSharp.Authentication
 {
     /// <summary>
-    /// Represents a session authentication server which uses the HTTP protocol to send out session tokens to authenticating NP clients.
+    ///     Represents a session authentication server which uses the HTTP protocol to send out session tokens to
+    ///     authenticating NP clients.
     /// </summary>
     public class SessionAuthenticationServer
     {
@@ -21,7 +22,7 @@ namespace NPSharp.Authentication
         private HttpServer _http;
 
         /// <summary>
-        /// Constructs a new session authentication server.
+        ///     Constructs a new session authentication server.
         /// </summary>
         public SessionAuthenticationServer()
         {
@@ -30,12 +31,12 @@ namespace NPSharp.Authentication
         }
 
         /// <summary>
-        /// Support oldskool "user&amp;&amp;pass" authentication format.
+        ///     Support oldskool "user&amp;&amp;pass" authentication format.
         /// </summary>
         public bool SupportOldAuthentication { get; set; }
 
         /// <summary>
-        /// Will be triggered whenever a client tries to authenticate via this server.
+        ///     Will be triggered whenever a client tries to authenticate via this server.
         /// </summary>
         public event Func<string, string, SessionAuthenticationResult> Authenticating;
 
@@ -48,7 +49,7 @@ namespace NPSharp.Authentication
         }
 
         /// <summary>
-        /// Starts the authentication server.
+        ///     Starts the authentication server.
         /// </summary>
         /// <param name="port">The port on which the authentication server should listen on.</param>
         public void Start(ushort port = 12003)
@@ -74,7 +75,7 @@ namespace NPSharp.Authentication
         }
 
         /// <summary>
-        /// Stops the authentication server.
+        ///     Stops the authentication server.
         /// </summary>
         public void Stop()
         {
@@ -125,6 +126,8 @@ namespace NPSharp.Authentication
                     sar = new SessionAuthenticationResult {Reason = @"Internal server error"};
                 }
 
+                _authServer._log.DebugFormat("/authenticate reply is {0}", sar);
+
                 context.Response = new HttpResponse(HttpResponseCode.Ok, sar.ToString(),
                     !sar.Success && context.Request.Headers.KeepAliveConnection());
                 return Task.Factory.GetCompleted();
@@ -135,47 +138,49 @@ namespace NPSharp.Authentication
     public class SessionAuthenticationResult
     {
         /// <summary>
-        /// true if authentication was successful, otherwise false.
+        ///     true if authentication was successful, otherwise false.
         /// </summary>
         public bool Success { get; set; }
 
         /// <summary>
-        /// Reason for the given success state. Use this especially in authentication fail cases.
+        ///     Reason for the given success state. Use this especially in authentication fail cases.
         /// </summary>
         public string Reason { get; set; }
 
         /// <summary>
-        /// If authenticated set this to the user's unique ID.
+        ///     If authenticated set this to the user's unique ID.
         /// </summary>
         public uint UserID { get; set; }
 
         /// <summary>
-        /// If authenticated set this to the user's session token.
+        ///     If authenticated set this to the user's session token.
         /// </summary>
         public string SessionToken { get; set; }
 
         /// <summary>
-        /// If authenticated set this to the actual correctly spelled username.
+        ///     If authenticated set this to the actual correctly spelled username.
         /// </summary>
         public string UserName { get; set; }
 
         /// <summary>
-        /// If authenticated set this to the user's e-mail address.
+        ///     If authenticated set this to the user's e-mail address.
         /// </summary>
         public string UserMail { get; set; }
 
         /// <summary>
-        /// Returns the response line as it should be sent out to the client.
+        ///     Returns the response line as it should be sent out to the client.
         /// </summary>
         public override string ToString()
         {
+            // Response will be in this syntax:
+            // (ok|fail)#text#userid#username#email#sessiontoken
             return String.Join("#",
                 Success ? "ok" : "fail",
                 String.IsNullOrEmpty(Reason) ? (Success ? "Success" : "Unknown error") : Reason,
                 UserID,
-                UserName,
-                UserMail,
-                SessionToken,
+                string.IsNullOrEmpty(UserName) ? "Anonymous" : UserName,
+                string.IsNullOrEmpty(UserMail) ? "anonymous@localhost" : UserMail,
+                string.IsNullOrEmpty(SessionToken) ? "0" : SessionToken,
                 String.Empty);
         }
     }
