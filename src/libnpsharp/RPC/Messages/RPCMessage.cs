@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -127,7 +126,7 @@ namespace NPSharp.RPC.Messages
             Log.DebugFormat("{3}[ID={0},Type={1},TypeName={2}] {{", mid, message.GetTypeId(), message.GetType().Name,
                 typeof (T).Name);
             foreach (
-                PropertyInfo prop in
+                var prop in
                     message.GetType().GetProperties().Where(p => !(p.DeclaringType == typeof (RPCServerMessage))))
             {
                 Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(message));
@@ -168,7 +167,7 @@ namespace NPSharp.RPC.Messages
 #if DEBUG
             Log.DebugFormat("{3}[ID={0},Type={1},TypeName={2}] {{", MessageId, GetTypeId(), GetType().Name,
                 GetType().Name);
-            foreach (PropertyInfo prop in GetType().GetProperties())
+            foreach (var prop in GetType().GetProperties())
             {
                 Log.DebugFormat("\t{0} = {1}", prop.Name, prop.GetValue(this));
             }

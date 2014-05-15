@@ -16,8 +16,8 @@ namespace NPSharp
     {
         private readonly List<NPServerClient> _clients;
         private readonly ILog _log;
-        private readonly Socket _socket;
         private readonly ushort _port;
+        private readonly Socket _socket;
 
         /// <summary>
         ///     Constructs a new NP server.
@@ -30,6 +30,34 @@ namespace NPSharp
             _socket = new Socket(SocketType.Stream, ProtocolType.IP);
             _port = port;
         }
+
+        /// <summary>
+        ///     The handler to use for file requests to this NP server.
+        /// </summary>
+        public IFileServingHandler FileServingHandler { get; set; }
+
+        /// <summary>
+        ///     The handler to use for user avatar requests to this NP server.
+        /// </summary>
+        public IUserAvatarHandler UserAvatarHandler { get; set; }
+
+        /// <summary>
+        ///     Returns all currently connected clients
+        /// </summary>
+        public NPServerClient[] Clients
+        {
+            get { return _clients.ToArray(); } // Avoid race condition by IEnum changes
+        }
+
+        /// <summary>
+        ///     The handler to use for authentication requests to this NP server.
+        /// </summary>
+        public IAuthenticationHandler AuthenticationHandler { get; set; }
+
+        /// <summary>
+        ///     The handler to use for friends-related requests to this NP server.
+        /// </summary>
+        public IFriendsHandler FriendsHandler { get; set; }
 
         /// <summary>
         ///     Starts up the NP server.
@@ -71,8 +99,8 @@ namespace NPSharp
 
                         var npsc = new NPServerClient(this, new RPCServerStream(clientSocket));
 
-                        _log.Debug("Async accept client end"); 
-                        
+                        _log.Debug("Async accept client end");
+
                         _handleClient(npsc);
                     }, _socket);
                     allDone.WaitOne();
@@ -89,37 +117,9 @@ namespace NPSharp
             _socket.Shutdown(SocketShutdown.Both);
         }
 
-        /// <summary>
-        ///     The handler to use for file requests to this NP server.
-        /// </summary>
-        public IFileServingHandler FileServingHandler { get; set; }
-
-        /// <summary>
-        ///     The handler to use for user avatar requests to this NP server.
-        /// </summary>
-        public IUserAvatarHandler UserAvatarHandler { get; set; }
-
-        /// <summary>
-        ///     Returns all currently connected clients
-        /// </summary>
-        public NPServerClient[] Clients
-        {
-            get { return _clients.ToArray(); } // Avoid race condition by IEnum changes
-        }
-
-        /// <summary>
-        ///     The handler to use for authentication requests to this NP server.
-        /// </summary>
-        public IAuthenticationHandler AuthenticationHandler { get; set; }
-
-        /// <summary>
-        ///     The handler to use for friends-related requests to this NP server.
-        /// </summary>
-        public IFriendsHandler FriendsHandler { get; set; }
-
         internal void _handleClient(NPServerClient client)
         {
-            _log.Debug("Client now being handled"); 
+            _log.Debug("Client now being handled");
 
             #region RPC authentication message handlers
 
@@ -233,7 +233,7 @@ namespace NPSharp
                 // Send authentication result directly to client
                 client.RPC.Send(new AuthenticateResultMessage
                 {
-                    NPID = result.UserID == null ? 0 : result.UserID.AccountID,
+                    NPID = result.UserID == null ? 0 : result.UserID.ConvertToUint64(),
                     Result = result.Result ? 0 : 1,
                     SessionToken = msg.Token
                 });
@@ -568,8 +568,8 @@ namespace NPSharp
             try
             {
 #endif
-                _log.Debug("Client connected");
-                OnClientConnected(client);
+            _log.Debug("Client connected");
+            OnClientConnected(client);
 #if !DEBUG
             try
 #endif

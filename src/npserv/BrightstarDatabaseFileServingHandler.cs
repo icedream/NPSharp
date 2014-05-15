@@ -15,15 +15,13 @@ namespace NPSharp.CommandLine.Server
             _db = database;
         }
 
-        ~BrightstarDatabaseFileServingHandler()
-        {
-            _db.Dispose();
-        }
-
         public byte[] ReadUserFile(NPServerClient client, string file)
         {
             var resultEnum =
-                _db.UserFiles.Where(uf => uf.User.Id == client.UserID.AccountID.ToString(CultureInfo.InvariantCulture) && uf.FileName == file);
+                _db.UserFiles.Where(
+                    uf =>
+                        uf.User.Id == client.UserID.AccountID.ToString(CultureInfo.InvariantCulture) &&
+                        uf.FileName == file);
 
             return resultEnum.Any() ? resultEnum.Single().FileData : null;
         }
@@ -39,7 +37,11 @@ namespace NPSharp.CommandLine.Server
         public void WriteUserFile(NPServerClient client, string file, byte[] data)
         {
             var resultEnum =
-                _db.UserFiles.Where(uf => uf.User.Id == client.UserID.AccountID.ToString(CultureInfo.InvariantCulture) && uf.FileName == file);
+                _db.UserFiles.Where(
+                    uf =>
+                        uf.User.Id == client.UserID.AccountID.ToString(CultureInfo.InvariantCulture) &&
+                        uf.FileName == file)
+                        .ToArray();
 
             var userFile = resultEnum.Any() ? resultEnum.Single() : _db.UserFiles.Create();
             userFile.FileName = file;
@@ -47,6 +49,11 @@ namespace NPSharp.CommandLine.Server
             userFile.User = _db.Users.Single(u => u.Id == client.UserID.AccountID.ToString(CultureInfo.InvariantCulture));
 
             _db.SaveChanges();
+        }
+
+        ~BrightstarDatabaseFileServingHandler()
+        {
+            _db.Dispose();
         }
 
         protected byte[] GetDefaultUserFile(string file)

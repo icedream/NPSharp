@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,9 +88,8 @@ namespace NPSharp.CommandLine.Server
                             _log.DebugFormat("Ban {0} became invalid", ban.Id);
                             dbForCleanup.DeleteObject(ban);
                         }
-                        foreach (
-                            var cheatDetection in
-                                dbForCleanup.CheatDetections.Where(s => s.ExpiryTime < DateTime.Now).ToArray())
+
+                        foreach (var cheatDetection in dbForCleanup.CheatDetections.Where(s => s.ExpiryTime < DateTime.Now).ToArray())
                         {
                             _log.DebugFormat("Cheat detection {0} became invalid", cheatDetection.Id);
                             dbForCleanup.DeleteObject(cheatDetection);
@@ -212,8 +210,7 @@ namespace NPSharp.CommandLine.Server
                     {
                         appender,
                         new DebugAppender {Layout = appender.Layout, Threshold = Level.All}
-                    }
-                    );
+                    });
             }
             else
             {
@@ -232,8 +229,7 @@ namespace NPSharp.CommandLine.Server
                     {
                         Level = Level.Debug,
                         ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity
-                    }
-                    );
+                    });
                 appender.AddMapping(
                     new ColoredConsoleAppender.LevelColors
                     {
@@ -249,8 +245,7 @@ namespace NPSharp.CommandLine.Server
                         Level = Level.Warn,
                         ForeColor =
                             ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity
-                    }
-                    );
+                    });
 
                 appender.AddMapping(
                     new ColoredConsoleAppender.LevelColors
@@ -266,8 +261,7 @@ namespace NPSharp.CommandLine.Server
                         ForeColor =
                             ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity,
                         BackColor = ColoredConsoleAppender.Colors.Red
-                    }
-                    );
+                    });
 
                 appender.ActivateOptions();
                 BasicConfigurator.Configure(
@@ -275,8 +269,7 @@ namespace NPSharp.CommandLine.Server
                     {
                         appender,
                         new DebugAppender {Layout = appender.Layout, Threshold = Level.All}
-                    }
-                    );
+                    });
             }
 
             _log = LogManager.GetLogger("Main");

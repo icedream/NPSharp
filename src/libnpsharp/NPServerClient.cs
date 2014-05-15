@@ -26,7 +26,8 @@ namespace NPSharp
 
         public IEnumerable<FriendDetails> Friends
         {
-            get {
+            get
+            {
                 return NP.FriendsHandler == null
                     ? new FriendDetails[0]
                     : NP.FriendsHandler.GetFriends(this).ToArray();

@@ -7,7 +7,6 @@ namespace NPSharp.CommandLine.Server.Database
     [Entity]
     public interface IUser
     {
-        [Identifier("http://npserver.icedream.kthx.at/users/")]
         string Id { get; }
 
         string UserName { get; set; }

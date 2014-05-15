@@ -100,7 +100,7 @@ namespace NPSharp.RPC
             TypeCallbacks.Add(
                 new KeyValuePair<uint, Action<TRecv>>(
                     ((PacketAttribute) typeof (T).GetCustomAttributes(typeof (PacketAttribute), false).Single()).Type,
-                    msg => callback.Invoke((T)msg)));
+                    msg => callback.Invoke((T) msg)));
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace NPSharp.RPC
             if (message.MessageId == default(uint))
                 message.MessageId = MessageID;
 
-            byte[] buffer = message.Serialize();
+            var buffer = message.Serialize();
 
             _sock.Send(buffer);
 
