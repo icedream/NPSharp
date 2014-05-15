@@ -233,7 +233,7 @@ namespace NPSharp
                 // Send authentication result directly to client
                 client.RPC.Send(new AuthenticateResultMessage
                 {
-                    NPID = result.UserID,
+                    NPID = result.UserID == null ? 0 : result.UserID.AccountID,
                     Result = result.Result ? 0 : 1,
                     SessionToken = msg.Token
                 });
