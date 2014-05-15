@@ -570,14 +570,25 @@ namespace NPSharp
 #endif
                 _log.Debug("Client connected");
                 OnClientConnected(client);
+#if !DEBUG
+            try
+#endif
+            {
                 while (true)
                 {
                     var msg = client.RPC.Read();
                     if (msg == null)
                         break;
                 }
-                _log.Debug("Client disconnected");
-                OnClientDisconnected(client);
+            }
+#if !DEBUG
+            catch (Exception error)
+            {
+                _log.Error("Error in RPC read loop", error);
+            }
+#endif
+            _log.Debug("Client disconnected");
+            OnClientDisconnected(client);
 #if !DEBUG
             }
             catch (Exception error)
