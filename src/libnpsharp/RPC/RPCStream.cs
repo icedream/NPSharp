@@ -162,11 +162,11 @@ namespace NPSharp.RPC
                 MessageID = message.MessageId;
 
             // Callbacks
-            foreach (var cbi in IDCallbacks.Where(p => p.Key == message.MessageId))
+            foreach (var cbi in IDCallbacks.Where(p => p.Key == message.MessageId).ToArray())
                 cbi.Value.Invoke(message);
-            foreach (var cbi in TypeCallbacks.Where(p => p.Key == message.GetTypeId()))
+            foreach (var cbi in TypeCallbacks.Where(p => p.Key == message.GetTypeId()).ToArray())
                 cbi.Value.Invoke(message);
-            foreach (var callback in GeneralCallbacks)
+            foreach (var callback in GeneralCallbacks.ToArray())
                 callback.Invoke(message);
 
             return message;
