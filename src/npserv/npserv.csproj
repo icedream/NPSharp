@@ -74,6 +74,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\BrightstarDatabaseContext.custom.cs" />
+    <Compile Include="Database\DatabaseUserExistsException.cs" />
     <Compile Include="Database\IBan.cs" />
     <Compile Include="Database\ICheatDetection.cs" />
     <Compile Include="Database\IFriend.cs" />

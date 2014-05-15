@@ -13,6 +13,8 @@ namespace NPSharp.CommandLine.Server.Database
 
         string UserMail { get; set; }
 
+        uint UserNumber { get; set; }
+
         string PasswordHash { get; set; }
 
         DateTime LastLogin { get; set; }

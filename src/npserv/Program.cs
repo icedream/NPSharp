@@ -33,7 +33,6 @@ namespace NPSharp.CommandLine.Server
 
         private static BrightstarDatabaseContext OpenDatabase(string store = "NP")
         {
-            // TODO: This line is CREATING a new database but it's supposed to open it only if it's already created. Look up!
             return
                 new BrightstarDatabaseContext(
                     "type=embedded;storesdirectory=Database\\;storename=" + store,
@@ -53,21 +52,16 @@ namespace NPSharp.CommandLine.Server
                 if (db.Users.Count() > 0)
                     return;
 
-                // Create first user (test:test)
-                var testUser = db.Users.Create();
-                testUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("test");
-                testUser.UserMail = "test@localhost";
-                testUser.UserName = "test";
+                // Create first user
+                var testUser = db.CreateUser("test", "test@localhost", "test");
+                db.SaveChanges();
 
                 _log.InfoFormat(
                     "Created first user with following details:" + Environment.NewLine + Environment.NewLine +
-                    "Username: {0}" + Environment.NewLine + "Password: {1}",
+                    "Username: {0}" + Environment.NewLine +
+                    "Password: {1}" + Environment.NewLine,
                     testUser.UserName,
                     "test");
-
-                db.SaveChanges();
-
-                _log.DebugFormat("First user id is {0}", testUser.Id);
             }
 
             // Cleanup thread
@@ -78,11 +72,13 @@ namespace NPSharp.CommandLine.Server
                     using (var dbForCleanup = OpenDatabase())
                     {
                         _log.Debug("Starting cleanup...");
+
                         foreach (var session in dbForCleanup.Sessions.Where(s => s.ExpiryTime < DateTime.Now).ToArray())
                         {
                             _log.DebugFormat("Session {0} became invalid", session.Id);
                             dbForCleanup.DeleteObject(session);
                         }
+
                         foreach (var ban in dbForCleanup.Bans.Where(s => s.ExpiryTime < DateTime.Now).ToArray())
                         {
                             _log.DebugFormat("Ban {0} became invalid", ban.Id);
@@ -95,7 +91,6 @@ namespace NPSharp.CommandLine.Server
                             dbForCleanup.DeleteObject(cheatDetection);
                         }
 
-                        _log.Debug("Saving cleanup...");
                         dbForCleanup.SaveChanges();
 
                         _log.Debug("Cleanup done.");
@@ -117,15 +112,11 @@ namespace NPSharp.CommandLine.Server
             {
                 using (var db = OpenDatabase())
                 {
-                    var matchingUsers =
-                        db.Users.Where(u => u.UserName == loginUsername).ToArray() // brightstar level
-                        .Where(u => BCrypt.Net.BCrypt.Verify(loginPassword, u.PasswordHash)).ToArray() // local level
-                        ;
+                    var user = db.GetUser(loginUsername);
 
-                    if (!matchingUsers.Any())
+
+                    if (user == null || !BCrypt.Net.BCrypt.Verify(loginPassword, user.PasswordHash))
                         return new SessionAuthenticationResult {Reason = "Invalid credentials"};
-
-                    var user = matchingUsers.Single();
 
                     // Check for bans
                     var bans = user.Bans.Where(b => b.ExpiryTime > DateTime.Now).ToArray();
@@ -153,9 +144,8 @@ namespace NPSharp.CommandLine.Server
                     }
 
                     // Create user session
-                    var session = db.Sessions.Create();
-                    session.ExpiryTime = DateTime.Now + TimeSpan.FromMinutes(3);
-                    user.Sessions.Add(session);
+                    var session = db.CreateSession(user);
+                    _log.DebugFormat("Created session {0}", session.Id);
 
                     // Update user's last login data
                     user.LastLogin = DateTime.Now;
@@ -168,7 +158,7 @@ namespace NPSharp.CommandLine.Server
                     {
                         Success = true,
                         SessionToken = session.Id,
-                        UserID = uint.Parse(user.Id, NumberStyles.Integer),
+                        UserID = user.UserNumber,
                         UserMail = user.UserMail,
                         UserName = user.UserName
                     };

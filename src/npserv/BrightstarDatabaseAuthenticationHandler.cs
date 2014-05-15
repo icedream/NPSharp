@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using log4net;
@@ -26,25 +27,28 @@ namespace NPSharp.CommandLine.Server
 
         public AuthenticationResult AuthenticateUser(NPServerClient client, string token)
         {
+            var ar = new AuthenticationResult();
+
             // Check if token is valid
-            var resultEnum = _db.Sessions.Where(s => s.Id == token && s.ExpiryTime > DateTime.Now);
-            if (!resultEnum.Any())
-                return new AuthenticationResult(); // authentication failed because token is invalid
-
-            var session = resultEnum.Single();
-
-            var ar =
-                new AuthenticationResult(new CSteamID
+            _db.ValidateSession(token, session =>
+            {
+                if (session == null)
                 {
-                    AccountID = uint.Parse(session.User.Id, NumberStyles.Integer),
-                    AccountInstance = 1,
-                    AccountType = EAccountType.Individual,
-                    AccountUniverse = EUniverse.Public
-                });
+                    return;
+                }
 
-            _db.DeleteObject(session);
+                ar =
+                    new AuthenticationResult(new CSteamID
+                    {
+                        AccountID = session.User.UserNumber,
+                        AccountInstance = 1,
+                        AccountType = EAccountType.Individual,
+                        AccountUniverse = EUniverse.Public
+                    });
+
+                _log.DebugFormat("Deleting validated session {0}", session.Id);
+            });
             _db.SaveChanges();
-            _log.DebugFormat("Deleted now used session {0}", session.Id);
 
             return ar;
         }
