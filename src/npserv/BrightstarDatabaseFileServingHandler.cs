@@ -23,15 +23,15 @@ namespace NPSharp.CommandLine.Server
                         uf.User.Id == client.UserID.AccountID.ToString(CultureInfo.InvariantCulture) &&
                         uf.FileName == file);
 
-            return resultEnum.Any() ? resultEnum.Single().FileData : null;
+            return resultEnum.Any() ? resultEnum.Single().FileData : GetDefaultUserFile(file);
         }
 
         public byte[] ReadPublisherFile(NPServerClient client, string file)
         {
             var resultEnum =
-                _db.PublisherFiles.Where(pf => pf.FileName == file);
+                _db.PublisherFiles.Where(pf => pf.FileName == file).ToArray();
 
-            return resultEnum.Any() ? resultEnum.Single().FileData : null;
+            return resultEnum.Any() ? resultEnum.Single().FileData : GetDefaultPublisherFile(file);
         }
 
         public void WriteUserFile(NPServerClient client, string file, byte[] data)
