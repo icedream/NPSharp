@@ -6,6 +6,7 @@ namespace NPSharp.CommandLine.Server.Database
     [Entity]
     public interface ISession
     {
+        [Identifier]
         string Id { get; }
 
         IUser User { get; }

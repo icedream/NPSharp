@@ -7,6 +7,7 @@ namespace NPSharp.CommandLine.Server.Database
     [Entity]
     public interface IUser
     {
+        [Identifier]
         string Id { get; }
 
         string UserName { get; set; }
