@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthenticationResult.cs" />
+    <Compile Include="Authentication\SessionAuthenticationResult.cs" />
     <Compile Include="Authentication\SessionAuthenticationServer.cs" />
     <Compile Include="ClientEventArgs.cs" />
     <Compile Include="ClientEventHandler.cs" />
