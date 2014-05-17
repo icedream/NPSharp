@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using log4net;
 using NPSharp.RPC;
 using NPSharp.RPC.Messages;
+using NPSharp.RPC.Messages.Client;
+using NPSharp.RPC.Messages.Server;
 using NPSharp.Steam;
 
 namespace NPSharp

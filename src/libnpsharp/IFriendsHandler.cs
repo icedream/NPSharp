@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NPSharp.RPC.Messages;
+using NPSharp.RPC.Messages.Structs;
 
 namespace NPSharp
 {

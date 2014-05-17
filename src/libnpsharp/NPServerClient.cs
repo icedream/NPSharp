@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NPSharp.RPC;
 using NPSharp.RPC.Messages;
+using NPSharp.RPC.Messages.Structs;
 using NPSharp.Steam;
 
 namespace NPSharp
