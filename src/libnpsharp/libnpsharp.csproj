@@ -63,20 +63,20 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthenticationResult.cs" />
+    <Compile Include="NP\NPAuthenticationResult.cs" />
     <Compile Include="Authentication\SessionAuthenticationResult.cs" />
     <Compile Include="Authentication\SessionAuthenticationServer.cs" />
-    <Compile Include="ClientEventArgs.cs" />
-    <Compile Include="ClientEventHandler.cs" />
-    <Compile Include="IAuthenticationHandler.cs" />
-    <Compile Include="IFileServingHandler.cs" />
-    <Compile Include="IFriendsHandler.cs" />
-    <Compile Include="IUserAvatarHandler.cs" />
-    <Compile Include="NPClient.cs" />
-    <Compile Include="NPFileException.cs" />
-    <Compile Include="NPServer.cs" />
-    <Compile Include="NPServerClient.cs" />
-    <Compile Include="PresenceState.cs" />
+    <Compile Include="Events\ClientEventArgs.cs" />
+    <Compile Include="Events\ClientEventHandler.cs" />
+    <Compile Include="Handlers\IAuthenticationHandler.cs" />
+    <Compile Include="Handlers\IFileServingHandler.cs" />
+    <Compile Include="Handlers\IFriendsHandler.cs" />
+    <Compile Include="Handlers\IUserAvatarHandler.cs" />
+    <Compile Include="NP\NPClient.cs" />
+    <Compile Include="NP\NPFileException.cs" />
+    <Compile Include="NP\NPServer.cs" />
+    <Compile Include="NP\NPServerClient.cs" />
+    <Compile Include="RPC\Messages\Data\PresenceState.cs" />
     <Compile Include="RPC\Messages\Client\AuthenticateRegisterServerMessage.cs" />
     <Compile Include="RPC\Messages\Server\AuthenticateRegisterServerResultMessage.cs" />
     <Compile Include="RPC\Messages\Server\AuthenticateUserGroupMessage.cs" />
@@ -84,17 +84,17 @@
     <Compile Include="RPC\Messages\Server\AuthenticateValidateTicketResultMessage.cs" />
     <Compile Include="RPC\Messages\Client\AuthenticateWithDetailsMessage.cs" />
     <Compile Include="RPC\Messages\Client\AuthenticateWithKeyMessage.cs" />
-    <Compile Include="RPC\Messages\Structs\FriendDetails.cs" />
+    <Compile Include="RPC\Messages\Data\FriendDetails.cs" />
     <Compile Include="RPC\Messages\Client\FriendsSetSteamIDMessage.cs" />
     <Compile Include="RPC\Messages\Client\FriendsGetProfileDataMessage.cs" />
     <Compile Include="RPC\Messages\Server\FriendsGetProfileDataResultMessage.cs" />
     <Compile Include="RPC\Messages\Client\FriendsGetUserAvatarMessage.cs" />
     <Compile Include="RPC\Messages\Server\FriendsGetUserAvatarResultMessage.cs" />
-    <Compile Include="RPC\Messages\Structs\FriendsPresence.cs" />
+    <Compile Include="RPC\Messages\Data\FriendsPresence.cs" />
     <Compile Include="RPC\Messages\Server\FriendsPresenceMessage.cs" />
     <Compile Include="RPC\Messages\Server\FriendsRosterMessage.cs" />
     <Compile Include="RPC\Messages\Client\FriendsSetPresenceMessage.cs" />
-    <Compile Include="RPC\Messages\Structs\ProfileData.cs" />
+    <Compile Include="RPC\Messages\Data\ProfileData.cs" />
     <Compile Include="RPC\RPCClientStream.cs" />
     <Compile Include="RPC\Messages\Server\AuthenticateExternalStatusMessage.cs" />
     <Compile Include="RPC\Messages\Server\AuthenticateResultMessage.cs" />
@@ -122,8 +122,8 @@
     <Compile Include="Steam\EUniverse.cs" />
     <Compile Include="Steam\InteropHelp.cs" />
     <Compile Include="Steam\SteamID_t.cs" />
-    <Compile Include="Ticket.cs" />
-    <Compile Include="TicketValidationResult.cs" />
+    <Compile Include="RPC\Messages\Data\Ticket.cs" />
+    <Compile Include="RPC\Messages\Data\TicketValidationResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Steam\README.txt" />

@@ -5,11 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using NPSharp.RPC;
-using NPSharp.RPC.Messages;
 using NPSharp.RPC.Messages.Client;
 using NPSharp.RPC.Messages.Server;
 
-namespace NPSharp
+namespace NPSharp.NP
 {
     /// <summary>
     ///     Represents a high-level network platform client.

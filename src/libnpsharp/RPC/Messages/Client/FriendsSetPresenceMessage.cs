@@ -1,4 +1,4 @@
-using NPSharp.RPC.Messages.Structs;
+using NPSharp.RPC.Messages.Data;
 using ProtoBuf;
 
 namespace NPSharp.RPC.Messages.Client

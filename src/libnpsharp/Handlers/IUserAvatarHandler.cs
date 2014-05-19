@@ -1,6 +1,6 @@
 using NPSharp.Steam;
 
-namespace NPSharp
+namespace NPSharp.Handlers
 {
     /// <summary>
     ///     Represents a handler for all user avatar-related requests.

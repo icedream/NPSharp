@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Text;
 using NPSharp.CommandLine.Server.Database;
+using NPSharp.Handlers;
+using NPSharp.NP;
 
 namespace NPSharp.CommandLine.Server
 {

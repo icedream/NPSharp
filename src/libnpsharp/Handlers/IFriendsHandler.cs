@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using NPSharp.RPC.Messages;
-using NPSharp.RPC.Messages.Structs;
+using NPSharp.NP;
+using NPSharp.RPC.Messages.Data;
 
-namespace NPSharp
+namespace NPSharp.Handlers
 {
     /// <summary>
     ///     Represents a handler for all friends-related requests.

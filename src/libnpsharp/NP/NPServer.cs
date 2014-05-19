@@ -6,13 +6,15 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using NPSharp.Events;
+using NPSharp.Handlers;
 using NPSharp.RPC;
-using NPSharp.RPC.Messages;
 using NPSharp.RPC.Messages.Client;
+using NPSharp.RPC.Messages.Data;
 using NPSharp.RPC.Messages.Server;
 using NPSharp.Steam;
 
-namespace NPSharp
+namespace NPSharp.NP
 {
     public class NPServer
     {
@@ -127,7 +129,7 @@ namespace NPSharp
 
             client.RPC.AttachHandlerForMessageType<AuthenticateWithKeyMessage>(msg =>
             {
-                var result = new AuthenticationResult();
+                var result = new NPAuthenticationResult();
                 if (AuthenticationHandler != null)
                 {
                     try
@@ -164,7 +166,7 @@ namespace NPSharp
 
             client.RPC.AttachHandlerForMessageType<AuthenticateWithDetailsMessage>(msg =>
             {
-                var result = new AuthenticationResult();
+                var result = new NPAuthenticationResult();
                 if (AuthenticationHandler != null)
                 {
                     try
@@ -174,7 +176,7 @@ namespace NPSharp
                     catch (Exception error)
                     {
                         _log.Error("Error occurred in authentication handler", error);
-                        result = new AuthenticationResult();
+                        result = new NPAuthenticationResult();
                     }
                 }
 
@@ -219,7 +221,7 @@ namespace NPSharp
 
             client.RPC.AttachHandlerForMessageType<AuthenticateWithTokenMessage>(msg =>
             {
-                var result = new AuthenticationResult();
+                var result = new NPAuthenticationResult();
                 if (AuthenticationHandler != null)
                 {
                     try

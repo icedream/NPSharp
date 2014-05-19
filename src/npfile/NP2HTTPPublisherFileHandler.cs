@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using log4net;
+using NPSharp.NP;
 using uhttpsharp;
 using uhttpsharp.Headers;
 using HttpResponse = uhttpsharp.HttpResponse;

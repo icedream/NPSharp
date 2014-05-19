@@ -1,11 +1,11 @@
 using NPSharp.Steam;
 
-namespace NPSharp
+namespace NPSharp.NP
 {
     /// <summary>
     ///     Represents details about the outcome of an authentication attempt.
     /// </summary>
-    public class AuthenticationResult
+    public class NPAuthenticationResult
     {
         /// <summary>
         ///     Constructs an authentication result instance.
@@ -14,7 +14,7 @@ namespace NPSharp
         ///     Set this to null if authentication should fail, otherwise use an instance of a steam ID which is
         ///     unique to the user.
         /// </param>
-        public AuthenticationResult(CSteamID npid = null)
+        public NPAuthenticationResult(CSteamID npid = null)
         {
             UserID = npid;
         }

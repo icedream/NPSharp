@@ -1,6 +1,7 @@
 ﻿using System;
+using NPSharp.NP;
 
-namespace NPSharp
+namespace NPSharp.Events
 {
     public class ClientEventArgs : EventArgs
     {

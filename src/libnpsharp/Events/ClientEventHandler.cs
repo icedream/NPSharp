@@ -1,4 +1,6 @@
-namespace NPSharp
+using NPSharp.NP;
+
+namespace NPSharp.Events
 {
     /// <summary>
     ///     A delegate for all general client-related events.

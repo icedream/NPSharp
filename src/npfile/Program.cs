@@ -9,6 +9,7 @@ using log4net.Config;
 using log4net.Core;
 using log4net.Layout;
 using NPSharp.Authentication;
+using NPSharp.NP;
 using uhttpsharp;
 using uhttpsharp.Handlers;
 using uhttpsharp.Headers;

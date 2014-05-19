@@ -1,4 +1,4 @@
-namespace NPSharp
+namespace NPSharp.RPC.Messages.Data
 {
     /// <summary>
     ///     Represents the outcome of a ticket validation attempt.

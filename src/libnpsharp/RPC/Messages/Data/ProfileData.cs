@@ -1,12 +1,12 @@
 using System;
 using ProtoBuf;
 
-namespace NPSharp.RPC.Messages.Structs
+namespace NPSharp.RPC.Messages.Data
 {
     [ProtoContract]
-    public sealed class FriendDetails
+    public sealed class ProfileData
     {
-        internal FriendDetails()
+        internal ProfileData()
         {
         }
 
@@ -14,6 +14,6 @@ namespace NPSharp.RPC.Messages.Structs
         public UInt64 NPID { get; set; }
 
         [ProtoMember(2)]
-        public string Name { get; set; }
+        public byte[] Profile { get; set; }
     }
 }

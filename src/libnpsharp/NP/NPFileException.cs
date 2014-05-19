@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NPSharp
+namespace NPSharp.NP
 {
     internal class NpFileException : Exception
     {

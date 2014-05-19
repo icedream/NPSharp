@@ -1,4 +1,7 @@
-namespace NPSharp
+using NPSharp.NP;
+using NPSharp.RPC.Messages.Data;
+
+namespace NPSharp.Handlers
 {
     /// <summary>
     ///     Represents a handler for all authentication-related requests.
@@ -11,24 +14,24 @@ namespace NPSharp
         /// <param name="client">The NP server client to authenticate</param>
         /// <param name="username">The username to use for authentication</param>
         /// <param name="password">The password to use for authentication</param>
-        /// <returns>An instance of <seealso cref="AuthenticationResult" /></returns>
-        AuthenticationResult AuthenticateUser(NPServerClient client, string username, string password);
+        /// <returns>An instance of <seealso cref="NPAuthenticationResult" /></returns>
+        NPAuthenticationResult AuthenticateUser(NPServerClient client, string username, string password);
 
         /// <summary>
         ///     Authenticates a user based on a session token.
         /// </summary>
         /// <param name="client">The NP server client to authenticate</param>
         /// <param name="token">The session token to use for authentication</param>
-        /// <returns>An instance of <seealso cref="AuthenticationResult" /></returns>
-        AuthenticationResult AuthenticateUser(NPServerClient client, string token);
+        /// <returns>An instance of <seealso cref="NPAuthenticationResult" /></returns>
+        NPAuthenticationResult AuthenticateUser(NPServerClient client, string token);
 
         /// <summary>
         ///     Authenticates a dedicated server based on its license key.
         /// </summary>
         /// <param name="client">The NP server client of the dedicated server to authenticate</param>
         /// <param name="licenseKey">The license key to use for authentication</param>
-        /// <returns>An instance of <see cref="AuthenticationResult" /></returns>
-        AuthenticationResult AuthenticateServer(NPServerClient client, string licenseKey);
+        /// <returns>An instance of <see cref="NPAuthenticationResult" /></returns>
+        NPAuthenticationResult AuthenticateServer(NPServerClient client, string licenseKey);
 
         /// <summary>
         ///     Validates a ticket.

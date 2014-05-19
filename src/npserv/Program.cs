@@ -9,6 +9,7 @@ using log4net.Core;
 using log4net.Layout;
 using NPSharp.Authentication;
 using NPSharp.CommandLine.Server.Database;
+using NPSharp.NP;
 
 namespace NPSharp.CommandLine.Server
 {

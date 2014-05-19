@@ -1,4 +1,6 @@
-namespace NPSharp
+using NPSharp.NP;
+
+namespace NPSharp.Handlers
 {
     /// <summary>
     ///     Represents a handler for all file-related requests.

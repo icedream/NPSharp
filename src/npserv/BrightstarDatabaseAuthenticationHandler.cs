@@ -4,6 +4,9 @@ using System.Globalization;
 using System.Linq;
 using log4net;
 using NPSharp.CommandLine.Server.Database;
+using NPSharp.Handlers;
+using NPSharp.NP;
+using NPSharp.RPC.Messages.Data;
 using NPSharp.Steam;
 
 namespace NPSharp.CommandLine.Server
@@ -19,15 +22,15 @@ namespace NPSharp.CommandLine.Server
             _db = database;
         }
 
-        public AuthenticationResult AuthenticateUser(NPServerClient client, string username, string password)
+        public NPAuthenticationResult AuthenticateUser(NPServerClient client, string username, string password)
         {
             // Nah, authenticating this way is deprecated as fuck.
-            return new AuthenticationResult();
+            return new NPAuthenticationResult();
         }
 
-        public AuthenticationResult AuthenticateUser(NPServerClient client, string token)
+        public NPAuthenticationResult AuthenticateUser(NPServerClient client, string token)
         {
-            var ar = new AuthenticationResult();
+            var ar = new NPAuthenticationResult();
 
             // Check if token is valid
             _db.ValidateSession(token, session =>
@@ -38,7 +41,7 @@ namespace NPSharp.CommandLine.Server
                 }
 
                 ar =
-                    new AuthenticationResult(new CSteamID
+                    new NPAuthenticationResult(new CSteamID
                     {
                         AccountID = session.User.UserNumber,
                         AccountInstance = 1,
@@ -53,7 +56,7 @@ namespace NPSharp.CommandLine.Server
             return ar;
         }
 
-        public AuthenticationResult AuthenticateServer(NPServerClient client, string licenseKey)
+        public NPAuthenticationResult AuthenticateServer(NPServerClient client, string licenseKey)
         {
             // TODO: AuthenticateServer
             throw new NotImplementedException();

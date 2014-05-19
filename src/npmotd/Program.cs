@@ -6,6 +6,7 @@ using log4net.Config;
 using log4net.Core;
 using log4net.Layout;
 using NPSharp.Authentication;
+using NPSharp.NP;
 
 namespace NPSharp.CommandLine.MOTD
 {

@@ -1,6 +1,6 @@
 using ProtoBuf;
 
-namespace NPSharp.RPC.Messages.Structs
+namespace NPSharp.RPC.Messages.Data
 {
     [ProtoContract]
     public sealed class FriendsPresence
