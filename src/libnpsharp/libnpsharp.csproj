@@ -126,6 +126,7 @@
     <Compile Include="RPC\Messages\Data\TicketValidationResult.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Master\README.txt" />
     <Content Include="Steam\README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
