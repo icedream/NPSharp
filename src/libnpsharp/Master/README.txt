@@ -34,6 +34,21 @@ This getServersResponse message's body is serialized as following:
 
 In short, serialized ip-port pairs/triples separated by ASCII backslashes and ended by an entry which decodes to "EOT".
 
+## Protocol limits
+
+(see https://github.com/kphillisjr/dpmaster/blob/master/src/messages.c for reference)
+
+```c
+// Timeout after a valid infoResponse (in secondes)
+#define TIMEOUT_INFORESPONSE (15 * 60)
+
+// Period of validity for a challenge string (in secondes)
+#define TIMEOUT_CHALLENGE 2
+
+// Maximum size of a reponse packet
+#define MAX_PACKET_SIZE_OUT 1400
+```
+
 ## Internal management
 
 Both the server and the client should be able to handle a variable amount of ports. For this, we plan following things:
@@ -46,3 +61,37 @@ Both the server and the client should be able to handle a variable amount of por
 	b) ...if rest == 0 bytes, prepare for reading next entry.
 
 This should be compatible with both, messages with 1 IP address + 1 port (game) and 1 IP address + 2 ports (game/query).
+
+## Messages
+
+(see https://github.com/kphillisjr/dpmaster/blob/master/src/messages.c for reference)
+
+// Types of messages (with samples):
+
+// Q3: "heartbeat QuakeArena-1\x0A"
+// DP: "heartbeat DarkPlaces\x0A"
+#define S2M_HEARTBEAT "heartbeat "
+
+// Q3 & DP & QFusion: "getinfo A_Challenge"
+#define M2S_GETINFO "getinfo"
+
+// Q3 & DP & QFusion: "infoResponse\x0A\\pure\\1\\..."
+#define S2M_INFORESPONSE "infoResponse\x0A"
+
+// Q3: "getservers 67 ffa empty full"
+// DP: "getservers DarkPlaces-Quake 3 empty full"
+// DP: "getservers Transfusion 3 empty full"
+// QFusion: "getservers qfusion 39 empty full"
+#define C2M_GETSERVERS "getservers "
+
+// DP: "getserversExt DarkPlaces-Quake 3 empty full ipv4 ipv6"
+// IOQuake3: "getserversExt 68 empty ipv6"
+#define C2M_GETSERVERSEXT "getserversExt "
+
+// Q3 & DP & QFusion:
+// "getserversResponse\\...(6 bytes)...\\...(6 bytes)...\\EOT\0\0\0"
+#define M2C_GETSERVERSREPONSE "getserversResponse"
+
+// DP & IOQuake3:
+// "getserversExtResponse\\...(6 bytes)...//...(18 bytes)...\\EOT\0\0\0"
+#define M2C_GETSERVERSEXTREPONSE "getserversExtResponse"
