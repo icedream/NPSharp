@@ -63,6 +63,10 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Master\Messages\Client\MasterGetServersExtendedMessage.cs" />
+    <Compile Include="Master\Messages\Client\MasterGetServersMessage.cs" />
+    <Compile Include="Master\Messages\MasterClientMessage.cs" />
+    <Compile Include="Master\Messages\MasterClientMessageAttribute.cs" />
     <Compile Include="NP\NPAuthenticationResult.cs" />
     <Compile Include="Authentication\SessionAuthenticationResult.cs" />
     <Compile Include="Authentication\SessionAuthenticationServer.cs" />
