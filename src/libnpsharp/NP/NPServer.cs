@@ -124,6 +124,7 @@ namespace NPSharp.NP
         /// </summary>
         public void Stop()
         {
+            // TODO: Wait for sockets to COMPLETELY shut down
             _socket.Shutdown(SocketShutdown.Both);
         }
 
@@ -361,12 +362,11 @@ namespace NPSharp.NP
 
             client.RPC.AttachHandlerForMessageType<FriendsGetUserAvatarMessage>(msg =>
             {
-                // Why so goddamn complicated, NTA. Fuck.
                 // TODO: Not compatible with non-public accounts
-                ulong npid = new CSteamID((uint) msg.Guid, EUniverse.Public,
+                var npid = new CSteamID((uint) msg.Guid, EUniverse.Public,
                     EAccountType.Individual).ConvertToUint64();
 
-                byte[] avatar = UserAvatarHandler.GetUserAvatar(npid) ?? UserAvatarHandler.GetDefaultAvatar();
+                var avatar = UserAvatarHandler.GetUserAvatar(npid) ?? UserAvatarHandler.GetDefaultAvatar();
 
                 client.RPC.Send(new FriendsGetUserAvatarResultMessage
                 {
@@ -474,7 +474,7 @@ namespace NPSharp.NP
                         return;
                     }
 
-                    byte[] data = FileServingHandler.ReadUserFile(client, msg.FileName);
+                    var data = FileServingHandler.ReadUserFile(client, msg.FileName);
                     if (data == null)
                     {
                         client.RPC.Send(new StorageUserFileMessage
