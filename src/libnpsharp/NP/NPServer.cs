@@ -31,7 +31,13 @@ namespace NPSharp.NP
             _log = LogManager.GetLogger("NPServer");
             _clients = new List<NPServerClient>();
 
-            _socket = new Socket(SocketType.Stream, ProtocolType.IP);
+            // Mono can't compile this since the constructor is proprietary to Windows' .NET library
+            //_socket = new Socket(SocketType.Stream, ProtocolType.IP);
+
+            // Instead we will specifically disable the socket's property to ignore IPv4
+            _socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            _socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, 0);
+
             _port = port;
         }
 
