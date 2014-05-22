@@ -21,7 +21,12 @@ namespace NPSharp.NP
         private readonly List<NPServerClient> _clients;
         private readonly ILog _log;
         private readonly ushort _port;
+#if MONO_INCOMPATIBLE
         private readonly Socket _socket;
+#else
+        private readonly Socket _socket4;
+        private readonly Socket _socket6;
+#endif
 
         /// <summary>
         ///     Constructs a new NP server.
@@ -30,14 +35,20 @@ namespace NPSharp.NP
         {
             _log = LogManager.GetLogger("NPServer");
             _clients = new List<NPServerClient>();
-
+            
+#if MONO_INCOMPATIBLE
             // Mono can't compile this since the constructor is proprietary to Windows' .NET library
-            //_socket = new Socket(SocketType.Stream, ProtocolType.IP);
+            _socket = new Socket(SocketType.Stream, ProtocolType.IP);
 
-            // Instead we will specifically disable the socket's property to ignore IPv4
-            _socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-            _socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, 0);
-
+            // Mono can't compile this either since the IPv6Only socket option is completely missing.
+            //_socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            //_socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, 0);
+#else
+            // So as much as this hurts me, I have to go with TWO sockets.
+            // Guys, this is why I hate network programming sometimes. SOMETIMES.
+            _socket4 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket6 = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+#endif
             _port = port;
         }
 
@@ -74,7 +85,13 @@ namespace NPSharp.NP
         /// </summary>
         public void Start()
         {
-            if (_socket.IsBound)
+            if (
+#if MONO_INCOMPATIBLE
+                _socket.IsBound
+#else
+                _socket4.IsBound || _socket6.IsBound
+#endif
+                )
                 throw new InvalidOperationException("This server is already running");
 
             try
@@ -88,18 +105,37 @@ namespace NPSharp.NP
                 _log.Error("Socket permission request failed, can't start server.");
                 throw new SocketException(10013 /* Permission denied */);
             }
-
+            
+#if MONO_INCOMPATIBLE
             _socket.Bind(new IPEndPoint(IPAddress.IPv6Any, _port));
-            _socket.Listen(4);
+            _socket.Listen(100);
+#else
+            _socket4.Bind(new IPEndPoint(IPAddress.Any, _port));
+            _socket4.Listen(100);
+
+            _socket6.Bind(new IPEndPoint(IPAddress.IPv6Any, _port));
+            _socket6.Listen(100);
+#endif
 
             Task.Factory.StartNew(() =>
             {
                 _log.Debug("Listener loop started");
+#if MONO_INCOMPATIBLE
+                var socket = _socket;
+#else
+                var socket = _socket4;
+#endif
                 var allDone = new ManualResetEvent(false);
-                while (_socket != null && _socket.IsBound)
+                while (
+#if MONO_INCOMPATIBLE
+                    _socket != null && _socket.IsBound
+#else
+                    _socket4 != null && _socket4.IsBound
+#endif
+                    )
                 {
                     allDone.Reset();
-                    _socket.BeginAccept(ar =>
+                    socket.BeginAccept(ar =>
                     {
                         _log.Debug("Async accept client start");
                         allDone.Set();
@@ -112,12 +148,41 @@ namespace NPSharp.NP
                         _log.Debug("Async accept client end");
 
                         _handleClient(npsc);
-                    }, _socket);
+                    }, socket);
                     allDone.WaitOne();
                 }
                 _log.Debug("Listener loop shut down");
             });
+            
+#if !MONO_INCOMPATIBLE
+            Task.Factory.StartNew(() =>
+            {
+                _log.Debug("Listener loop (IPv6) started");
+
+                var allDone = new ManualResetEvent(false);
+                while (_socket6 != null && _socket6.IsBound)
+                {
+                    allDone.Reset();
+                    _socket6.BeginAccept(ar =>
+                    {
+                        _log.Debug("Async accept (IPv6) client start");
+                        allDone.Set();
+
+                        var serverSocket = (Socket)ar.AsyncState;
+                        var clientSocket = serverSocket.EndAccept(ar);
+
+                        var npsc = new NPServerClient(this, new RPCServerStream(clientSocket));
+
+                        _log.Debug("Async accept (IPv6) client end");
+
+                        _handleClient(npsc);
+                    }, _socket6);
+                    allDone.WaitOne();
+                }
+                _log.Debug("Listener loop (IPv6) shut down");
+            });
         }
+#endif
 
         /// <summary>
         ///     Shuts down all connections and stops the NP server.
@@ -125,7 +190,12 @@ namespace NPSharp.NP
         public void Stop()
         {
             // TODO: Wait for sockets to COMPLETELY shut down
+#if MONO_INCOMPATIBLE
             _socket.Shutdown(SocketShutdown.Both);
+#else
+            _socket4.Shutdown(SocketShutdown.Both);
+            _socket6.Shutdown(SocketShutdown.Both);
+#endif
         }
 
         internal void _handleClient(NPServerClient client)
