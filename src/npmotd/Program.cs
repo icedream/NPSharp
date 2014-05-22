@@ -71,7 +71,7 @@ namespace NPSharp.CommandLine.MOTD
                 {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
             }
 
-            ILog log = LogManager.GetLogger("Main");
+            var log = LogManager.GetLogger("Main");
 
             // Arguments
             if (args.Length < 4)

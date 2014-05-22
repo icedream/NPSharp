@@ -53,7 +53,7 @@
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+    <Reference Include="log4net">
       <HintPath>..\..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -65,9 +65,8 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
-    <Reference Include="uhttpsharp, Version=0.1.5230.25021, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\uHttpSharp.0.1.4.7\lib\net40\uhttpsharp.dll</HintPath>
+    <Reference Include="uhttpsharp">
+      <HintPath>..\..\packages\uHttpSharp.0.1.4.8\lib\net40\uhttpsharp.dll</HintPath>
     </Reference>
     <Reference Include="VDS.Common">
       <HintPath>..\..\packages\VDS.Common.1.2.0\lib\net40-client\VDS.Common.dll</HintPath>
