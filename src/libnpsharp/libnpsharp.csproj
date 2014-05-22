@@ -64,8 +64,10 @@
   <ItemGroup>
     <Compile Include="Master\Messages\Client\MasterGetServersExtendedMessage.cs" />
     <Compile Include="Master\Messages\Client\MasterGetServersMessage.cs" />
+    <Compile Include="Master\Messages\MasterServerMessage.cs" />
     <Compile Include="Master\Messages\MasterClientMessage.cs" />
     <Compile Include="Master\Messages\MasterClientMessageAttribute.cs" />
+    <Compile Include="Master\Messages\MasterServerMessageAttribute.cs" />
     <Compile Include="NP\NPAuthenticationResult.cs" />
     <Compile Include="Authentication\SessionAuthenticationResult.cs" />
     <Compile Include="Authentication\SessionAuthenticationServer.cs" />
