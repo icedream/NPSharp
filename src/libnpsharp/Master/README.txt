@@ -10,7 +10,7 @@ to be integrated into libnpsharp.
 
 ## Protocol
 
-The master server protocol is based on Quake 3's:
+The master server protocol is based on Quake 3's (http://src.gnu-darwin.org/ports/games/masterserver/work/masterserver-0.4.1/docs/PROTOCOLS):
 
 Request message:
 	AA AA AA AA|BB .. .. BB|		A=Header, B=Body ending with line break or \x00
