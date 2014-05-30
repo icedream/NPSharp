@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using log4net.Appender;
@@ -24,63 +23,8 @@ namespace NPSharp.CommandLine.File
         private static void Main(string[] args)
         {
             // log4net setup
-            if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
-                var appender = new ConsoleAppender
-                {
-#if DEBUG
-                    Threshold = Level.Debug,
-#else
-                Threshold = Level.Info,
-#endif
-                    Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
-                };
-                BasicConfigurator.Configure(new IAppender[]
-                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
-            }
-            else
-            {
-                var appender = new ColoredConsoleAppender
-                {
-#if DEBUG
-                    Threshold = Level.Debug,
-#else
-                Threshold = Level.Info,
-#endif
-                    Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
-                };
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors
-                {
-                    Level = Level.Debug,
-                    ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity
-                });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors
-                {
-                    Level = Level.Info,
-                    ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity
-                });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors
-                {
-                    Level = Level.Warn,
-                    ForeColor = ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity
-                });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors
-                {
-                    Level = Level.Error,
-                    ForeColor = ColoredConsoleAppender.Colors.Red | ColoredConsoleAppender.Colors.HighIntensity
-                });
-                appender.AddMapping(new ColoredConsoleAppender.LevelColors
-                {
-                    Level = Level.Fatal,
-                    ForeColor = ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity,
-                    BackColor = ColoredConsoleAppender.Colors.Red
-                });
-                appender.ActivateOptions();
-                BasicConfigurator.Configure(new IAppender[]
-                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
-            }
-
-            ILog log = LogManager.GetLogger("Main");
+            SetupLog4Net();
+            var log = LogManager.GetLogger("Main");
 
             // Arguments
             if (args.Length < 4)
@@ -120,13 +64,13 @@ namespace NPSharp.CommandLine.File
                 log.Error("Connection to NP server failed.");
                 return;
             }
+            log.Info("NP connection successful, authenticating..."); // ???
             if (!np.AuthenticateWithToken(ah.SessionToken).Result)
             {
                 np.Disconnect();
                 log.Error("Authentication to NP server failed.");
                 return;
             }
-            log.Info("NP connection successful, authenticating...");
 
 
             // HTTP server
@@ -148,8 +92,68 @@ namespace NPSharp.CommandLine.File
                 log.InfoFormat("HTTP server now running on port {0}.", hport);
                 log.InfoFormat("Access publisher files through http://{0}:{1}/pub/<file>", IPAddress.Any, hport);
                 log.InfoFormat("Access user files through http://{0}:{1}/user/<file>", IPAddress.Any, hport);
-                Thread.Sleep(Timeout.Infinite);
+                log.Info("You can shut down the HTTP server by pressing any key.");
+                Console.ReadKey();
             }
         }
+        private static void SetupLog4Net()
+        {
+
+            if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                var appender = new ConsoleAppender
+                {
+#if DEBUG
+                    Threshold = Level.Debug,
+#else
+                Threshold = Level.Info,
+#endif
+                    Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
+                };
+                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+            }
+            else
+            {
+                var appender = new ColoredConsoleAppender
+                {
+#if DEBUG
+                    Threshold = Level.Debug,
+#else
+                Threshold = Level.Info,
+#endif
+                    Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
+                };
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Debug,
+                    ForeColor = ColoredConsoleAppender.Colors.Cyan | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Info,
+                    ForeColor = ColoredConsoleAppender.Colors.Green | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Warn,
+                    ForeColor = ColoredConsoleAppender.Colors.Purple | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Error,
+                    ForeColor = ColoredConsoleAppender.Colors.Red | ColoredConsoleAppender.Colors.HighIntensity
+                });
+                appender.AddMapping(new ColoredConsoleAppender.LevelColors
+                {
+                    Level = Level.Fatal,
+                    ForeColor = ColoredConsoleAppender.Colors.White | ColoredConsoleAppender.Colors.HighIntensity,
+                    BackColor = ColoredConsoleAppender.Colors.Red
+                });
+                appender.ActivateOptions();
+                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+            }
+
+        }
+
     }
 }
