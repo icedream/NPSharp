@@ -3,8 +3,15 @@ using System.IO;
 
 namespace NPSharp.RPC.Messages.Data
 {
-    internal class Ticket
+    /// <summary>
+    /// Represents a ticket which is used to validate client-to-gameserver connections.
+    /// </summary>
+    public class Ticket
     {
+        /// <summary>
+        /// Reconstructs the ticket from raw byte data.
+        /// </summary>
+        /// <param name="data">The ticket's raw data</param>
         public Ticket(byte[] data)
         {
             if (data.Length < sizeof (uint) + (sizeof (ulong)*2) + sizeof (uint))
@@ -22,27 +29,45 @@ namespace NPSharp.RPC.Messages.Data
             }
         }
 
-        // TODO: Maybe leave out arguments which are supposed to be autofilled
-        public Ticket(uint version, ulong clientID, ulong serverID, uint? time = null)
+        /// <summary>
+        /// Constructs a ticket from given parameters.
+        /// </summary>
+        /// <param name="clientID">The client NPID</param>
+        /// <param name="serverID">The server NPID</param>
+        /// <param name="version">The ticket's structure version</param>
+        /// <param name="time">The ticket time</param>
+        public Ticket(ulong clientID, ulong serverID, uint version = 1, uint? time = null)
         {
-            Version = version;
             ClientID = clientID;
             ServerID = serverID;
+            Version = version;
             if (time.HasValue)
                 Time = time.Value;
             else
                 Time = (uint) DateTime.Now.ToUniversalTime().ToBinary();
         }
 
+        /// <summary>
+        /// Ticket structure version.
+        /// </summary>
         public uint Version { get; private set; }
 
+        /// <summary>
+        /// The client's ID on the NP server.
+        /// </summary>
         public ulong ClientID { get; private set; }
 
+        /// <summary>
+        /// The gameserver's ID on the NP server.
+        /// </summary>
         public ulong ServerID { get; private set; }
 
+        /// <summary>
+        /// The creation time of the ticket.
+        /// </summary>
         public uint Time { get; private set; }
 
-        public byte[] Serialize()
+        internal byte[] Serialize()
         {
             using (var ms = new MemoryStream(sizeof (uint) + (sizeof (ulong)*2) + sizeof (uint)))
             {

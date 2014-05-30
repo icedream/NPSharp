@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using log4net;
 using NPSharp.RPC;
 using NPSharp.RPC.Messages.Client;
+using NPSharp.RPC.Messages.Data;
 using NPSharp.RPC.Messages.Server;
 
 namespace NPSharp.NP
@@ -38,7 +39,7 @@ namespace NPSharp.NP
         /// <summary>
         ///     The internal RPC client.
         /// </summary>
-        public RPCClientStream RPCClient { get { return _rpc; } }
+        public RPCClientStream RPCClient { get; private set; }
 
         /// <summary>
         ///     The assigned NP user ID. Will be set on successful authentication.
@@ -155,7 +156,7 @@ namespace NPSharp.NP
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = packet as AuthenticateResultMessage;
                 if (result == null)
@@ -172,31 +173,34 @@ namespace NPSharp.NP
                 SessionToken = result.SessionToken;
                 tcs.SetResult(true);
             });
-            _rpc.Send(new AuthenticateWithKeyMessage { LicenseKey = key });
+            RPC.Send(new AuthenticateWithKeyMessage { LicenseKey = key });
 
             return await tcs.Task;
         }
 
-        public async Task<bool> ValidateTicket(uint clientIP, ulong npID, byte[] ticket)
+        /// <summary>
+        ///     Authenticates a server ticket.
+        /// </summary>
+        /// <returns>True if the ticket validation succeeded, otherwise false.</returns>
+        public async Task<bool> ValidateTicket(IPAddress clientIP, Ticket ticket)
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = packet as AuthenticateValidateTicketResultMessage;
                 if (result == null)
                     return;
 
-                if (result.Result != 0)
-                {
-                    tcs.SetResult(false);
-                }
-                else
-                {
-                    tcs.SetResult(true);
-                }
+                tcs.SetResult(result.Result == 0);
             });
-            _rpc.Send(new AuthenticateValidateTicketMessage { ClientIP = clientIP, Ticket = ticket, NPID = npID });
+
+            RPC.Send(new AuthenticateValidateTicketMessage
+            {
+                ClientIP = (uint)IPAddress.HostToNetworkOrder((int)BitConverter.ToUInt32(clientIP.GetAddressBytes(), 0)),
+                Ticket = ticket.Serialize(),
+                NPID = ticket.ClientID
+            });
 
             return await tcs.Task;
         }
