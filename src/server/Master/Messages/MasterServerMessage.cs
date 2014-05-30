@@ -34,10 +34,10 @@ namespace NPSharp.Master.Messages
 
         internal static MasterServerMessage Deserialize(byte[] buffer)
         {
-
             var header = buffer.Take(4).ToArray();
             var command = Encoding.ASCII.GetString(buffer, 4, buffer.Length - 4).Trim();
-            var commandSplit = command.Split(new[] { '\t', '\r', '\n', '\0', ' ' }, // TODO: Response consists of multipart messages separated by \ instead of <space>?? Try to be stay as close to client messages as possible.
+            var commandSplit = command.Split(new[] {'\t', '\r', '\n', '\0', ' '},
+                // TODO: Response consists of multipart messages separated by \ instead of <space>?? Try to be stay as close to client messages as possible.
                 StringSplitOptions.RemoveEmptyEntries);
 
             var commandName = commandSplit[0];
@@ -45,11 +45,11 @@ namespace NPSharp.Master.Messages
 
             // Search for a message class which fits to the commandName
             var message =
-                (MasterServerMessage)Activator.CreateInstance(Assembly.GetExecutingAssembly()
+                (MasterServerMessage) Activator.CreateInstance(Assembly.GetExecutingAssembly()
                     .GetTypes()
                     .Single(
                         t =>
-                            t.IsSubclassOf(typeof(MasterServerMessage)) &&
+                            t.IsSubclassOf(typeof (MasterServerMessage)) &&
                             t.GetCustomAttribute<MasterServerMessageAttribute>()
                                 .Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)));
 

@@ -24,7 +24,7 @@ namespace NPSharp.CommandLine.File
 
         public Task Handle(IHttpContext context, Func<Task> next)
         {
-            string uri = context.Request.QueryString.Any()
+            var uri = context.Request.QueryString.Any()
                 ? null
                 : string.Join("/", context.Request.Uri.OriginalString.Split('/').Skip(2));
             if (uri == null)
@@ -38,7 +38,7 @@ namespace NPSharp.CommandLine.File
                 }
 
             _log.InfoFormat("Requesting publisher file {0}", uri);
-            Task<byte[]> task = _np.GetPublisherFile(uri);
+            var task = _np.GetPublisherFile(uri);
             try
             {
                 task.Wait();

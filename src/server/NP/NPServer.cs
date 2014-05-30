@@ -35,9 +35,9 @@ namespace NPSharp.NP
         {
             _log = LogManager.GetLogger("NPServer");
             _clients = new List<NPServerClient>();
-            
+
 #if MONO_INCOMPATIBLE
-            // Mono can't compile this since the constructor is proprietary to Windows' .NET library
+    // Mono can't compile this since the constructor is proprietary to Windows' .NET library
             _socket = new Socket(SocketType.Stream, ProtocolType.IP);
 
             // Mono can't compile this either since the IPv6Only socket option is completely missing.
@@ -105,7 +105,7 @@ namespace NPSharp.NP
                 _log.Error("Socket permission request failed, can't start server.");
                 throw new SocketException(10013 /* Permission denied */);
             }
-            
+
 #if MONO_INCOMPATIBLE
             _socket.Bind(new IPEndPoint(IPAddress.IPv6Any, _port));
             _socket.Listen(100);
@@ -153,7 +153,7 @@ namespace NPSharp.NP
                 }
                 _log.Debug("Listener loop shut down");
             });
-            
+
 #if !MONO_INCOMPATIBLE
             Task.Factory.StartNew(() =>
             {
@@ -168,7 +168,7 @@ namespace NPSharp.NP
                         _log.Debug("Async accept (IPv6) client start");
                         allDone.Set();
 
-                        var serverSocket = (Socket)ar.AsyncState;
+                        var serverSocket = (Socket) ar.AsyncState;
                         var clientSocket = serverSocket.EndAccept(ar);
 
                         var npsc = new NPServerClient(this, new RPCServerStream(clientSocket));

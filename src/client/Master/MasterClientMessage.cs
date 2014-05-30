@@ -71,7 +71,7 @@ namespace NPSharp.Master.Messages
         {
             var header = buffer.Take(4).ToArray();
             var command = Encoding.ASCII.GetString(buffer, 4, buffer.Length - 4).Trim();
-            var commandSplit = command.Split(new[] { '\t', '\r', '\n', '\0', ' ' },
+            var commandSplit = command.Split(new[] {'\t', '\r', '\n', '\0', ' '},
                 StringSplitOptions.RemoveEmptyEntries);
 
             var commandName = commandSplit[0];
@@ -79,11 +79,11 @@ namespace NPSharp.Master.Messages
 
             // Search for a message class which fits to the commandName
             var message =
-                (MasterClientMessage)Activator.CreateInstance(Assembly.GetExecutingAssembly()
+                (MasterClientMessage) Activator.CreateInstance(Assembly.GetExecutingAssembly()
                     .GetTypes()
                     .Single(
                         t =>
-                            t.IsSubclassOf(typeof(MasterClientMessage)) &&
+                            t.IsSubclassOf(typeof (MasterClientMessage)) &&
                             t.GetCustomAttribute<MasterClientMessageAttribute>()
                                 .Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)));
 

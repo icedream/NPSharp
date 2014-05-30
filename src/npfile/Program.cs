@@ -14,7 +14,6 @@ using uhttpsharp.Handlers;
 using uhttpsharp.Headers;
 using uhttpsharp.Listeners;
 using uhttpsharp.RequestProviders;
-using HttpResponse = uhttpsharp.HttpResponse;
 
 namespace NPSharp.CommandLine.File
 {
@@ -96,9 +95,9 @@ namespace NPSharp.CommandLine.File
                 Console.ReadKey();
             }
         }
+
         private static void SetupLog4Net()
         {
-
             if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
                 var appender = new ConsoleAppender
@@ -110,7 +109,8 @@ namespace NPSharp.CommandLine.File
 #endif
                     Layout = new PatternLayout("<%d{HH:mm:ss}> [%logger:%thread] %level: %message%newline"),
                 };
-                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+                BasicConfigurator.Configure(new IAppender[]
+                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
             }
             else
             {
@@ -150,10 +150,9 @@ namespace NPSharp.CommandLine.File
                     BackColor = ColoredConsoleAppender.Colors.Red
                 });
                 appender.ActivateOptions();
-                BasicConfigurator.Configure(new IAppender[] { appender, new DebugAppender { Layout = appender.Layout, Threshold = Level.All } });
+                BasicConfigurator.Configure(new IAppender[]
+                {appender, new DebugAppender {Layout = appender.Layout, Threshold = Level.All}});
             }
-
         }
-
     }
 }

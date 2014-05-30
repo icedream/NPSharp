@@ -53,7 +53,7 @@
   <ItemGroup>
     <Compile Include="Authentication\SessionAuthenticationClient.cs" />
     <Compile Include="Authentication\SessionAuthenticationResult.cs" />
-    <Compile Include="Master\Client\MasterGetServersKeywords.cs" />
+    <Compile Include="Master\Data\MasterGetServersKeywords.cs" />
     <Compile Include="Master\Client\MasterGetServersMessage.cs" />
     <Compile Include="Master\DedicatedServerEntry.cs" />
     <Compile Include="Master\MasterClientMessage.cs" />

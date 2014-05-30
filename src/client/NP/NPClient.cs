@@ -194,7 +194,7 @@ namespace NPSharp.NP
         /// <param name="targetpath">Path where to save the file</param>
         public async void DownloadUserFileTo(string filename, string targetpath)
         {
-            byte[] contents = await GetUserFile(filename);
+            var contents = await GetUserFile(filename);
 
             File.WriteAllBytes(targetpath, contents);
         }
@@ -231,7 +231,7 @@ namespace NPSharp.NP
         /// <param name="targetpath">Path where to save the file</param>
         public async void DownloadPublisherFileTo(string filename, string targetpath)
         {
-            byte[] contents = await GetPublisherFile(filename);
+            var contents = await GetPublisherFile(filename);
 
             File.WriteAllBytes(targetpath, contents);
         }

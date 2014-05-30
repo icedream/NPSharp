@@ -25,7 +25,8 @@ namespace NPSharp.Master
             var buffer = new List<byte>();
 
             if (standardFormat)
-                buffer.AddRange(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(IP.GetHashCode()))); // TODO: GetHashCode == IP address as number???
+                buffer.AddRange(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(IP.GetHashCode())));
+                    // TODO: GetHashCode == IP address as number???
             else
             {
                 // TODO: Implement extended serialization format for IP addresses!

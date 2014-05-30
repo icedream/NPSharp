@@ -31,8 +31,16 @@ namespace NPSharp.RPC.Messages.Data
             if (time.HasValue)
                 Time = time.Value;
             else
-                Time = (uint)DateTime.Now.ToUniversalTime().ToBinary();
+                Time = (uint) DateTime.Now.ToUniversalTime().ToBinary();
         }
+
+        public uint Version { get; private set; }
+
+        public ulong ClientID { get; private set; }
+
+        public ulong ServerID { get; private set; }
+
+        public uint Time { get; private set; }
 
         public byte[] Serialize()
         {
@@ -49,13 +57,5 @@ namespace NPSharp.RPC.Messages.Data
                 }
             }
         }
-
-        public uint Version { get; private set; }
-
-        public ulong ClientID { get; private set; }
-
-        public ulong ServerID { get; private set; }
-
-        public uint Time { get; private set; }
     }
 }

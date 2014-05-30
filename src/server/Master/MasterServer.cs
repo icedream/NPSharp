@@ -3,29 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using NPSharp.Master.Messages;
 using NPSharp.Master.Messages.Client;
-using NPSharp.NP;
 
 namespace NPSharp.Master
 {
     public class MasterServer
     {
         // TODO: !! Avoid socket fail if stopping then restarting
-        private readonly Socket _socket4 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        private readonly Socket _socket6 = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
-
-        private readonly ILog _log;
-        private readonly ushort _port;
 
         private readonly List<KeyValuePair<Type, Action<MasterClientMessage>>> _callbacks =
             new List<KeyValuePair<Type, Action<MasterClientMessage>>>();
 
+        private readonly ILog _log;
+        private readonly ushort _port;
+
         // TODO: Use the same kind of interfaces as in NP server to handle server addition and deletion
         private readonly List<DedicatedServerEntry> _registeredServers = new List<DedicatedServerEntry>();
+        private readonly Socket _socket4 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        private readonly Socket _socket6 = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
 
         public MasterServer(ushort port = 20810)
         {
@@ -33,18 +31,15 @@ namespace NPSharp.Master
             _log = LogManager.GetLogger("MasterServer");
 
             // Internal callbacks
-            AddCallback<MasterGetServersMessage>(messages =>
-            {
-                
-            });
+            AddCallback<MasterGetServersMessage>(messages => { });
         }
 
         internal void AddCallback<T>(Action<T> callback) where T : MasterClientMessage
         {
             _callbacks.Add(
                 new KeyValuePair<Type, Action<MasterClientMessage>>(
-                    typeof(T),
-                    msg => callback.Invoke((T)msg)));
+                    typeof (T),
+                    msg => callback.Invoke((T) msg)));
         }
 
         /// <summary>
@@ -86,7 +81,7 @@ namespace NPSharp.Master
                     while (true)
                     {
                         var buffer = new byte[1400];
-                        var clientEndPoint = (EndPoint)new IPEndPoint(IPAddress.IPv6Any, 0);
+                        var clientEndPoint = (EndPoint) new IPEndPoint(IPAddress.IPv6Any, 0);
                         var recvLength = _socket6.ReceiveFrom(buffer, ref clientEndPoint);
                         if (recvLength <= buffer.Length)
                             mergedBuffer.AddRange(buffer);
@@ -118,6 +113,5 @@ namespace NPSharp.Master
 
             _log.DebugFormat("Not handling client {0} anymore", ep);
         }
-
     }
 }
