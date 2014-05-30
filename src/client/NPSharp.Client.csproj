@@ -46,10 +46,12 @@
     <Compile Include="Authentication\SessionAuthenticationClient.cs" />
     <Compile Include="Authentication\SessionAuthenticationResult.cs" />
     <Compile Include="Master\Data\MasterGetServersKeywords.cs" />
-    <Compile Include="Master\Client\MasterGetServersMessage.cs" />
+    <Compile Include="Master\Messages\Client\MasterGetServersMessage.cs" />
     <Compile Include="Master\DedicatedServerEntry.cs" />
-    <Compile Include="Master\MasterClientMessage.cs" />
-    <Compile Include="Master\MasterClientMessageAttribute.cs" />
+    <Compile Include="Master\Messages\MasterClientMessage.cs" />
+    <Compile Include="Master\Messages\MasterClientMessageAttribute.cs" />
+    <Compile Include="Master\Messages\MasterServerMessage.cs" />
+    <Compile Include="Master\Messages\MasterServerMessageAttribute.cs" />
     <Compile Include="NP\NPAuthenticationResult.cs" />
     <Compile Include="NP\NPClient.cs" />
     <Compile Include="NP\NPFileException.cs" />

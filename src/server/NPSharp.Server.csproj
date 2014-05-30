@@ -57,8 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Master\MasterServer.cs" />
-    <Compile Include="Master\Messages\MasterServerMessage.cs" />
-    <Compile Include="Master\Messages\MasterServerMessageAttribute.cs" />
     <Compile Include="Authentication\SessionAuthenticationServer.cs" />
     <Compile Include="Events\ClientEventArgs.cs" />
     <Compile Include="Events\ClientEventHandler.cs" />
