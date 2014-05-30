@@ -161,12 +161,41 @@ namespace NPSharp.NP
                     return;
 
                 if (result.Result != 0)
+                {
                     tcs.SetResult(false);
+
+                    return;
+                }
+
                 LoginId = result.NPID;
                 SessionToken = result.SessionToken;
                 tcs.SetResult(true);
             });
             _rpc.Send(new AuthenticateWithKeyMessage { LicenseKey = key });
+
+            return await tcs.Task;
+        }
+
+        public async Task<bool> ValidateTicket(uint clientIP, ulong npID, byte[] ticket)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+
+            _rpc.AttachHandlerForNextMessage(packet =>
+            {
+                var result = packet as AuthenticateValidateTicketResultMessage;
+                if (result == null)
+                    return;
+
+                if (result.Result != 0)
+                {
+                    tcs.SetResult(false);
+                }
+                else
+                {
+                    tcs.SetResult(true);
+                }
+            });
+            _rpc.Send(new AuthenticateValidateTicketMessage { ClientIP = clientIP, Ticket = ticket, NPID = npID });
 
             return await tcs.Task;
         }
