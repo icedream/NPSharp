@@ -35,6 +35,11 @@ namespace NPSharp.NP
         }
 
         /// <summary>
+        ///     The internal RPC client.
+        /// </summary>
+        public RPCClientStream RPCClient { get { return _rpc; } }
+
+        /// <summary>
         ///     The assigned NP user ID. Will be set on successful authentication.
         /// </summary>
         public ulong LoginId { get; private set; }
@@ -135,6 +140,33 @@ namespace NPSharp.NP
                 tcs.SetResult(true);
             });
             _rpc.Send(new AuthenticateWithTokenMessage {Token = token});
+
+            return await tcs.Task;
+        }
+
+        /// <summary>
+        ///     Authenticates this connection via a platform-specific license key. This may very well include ""
+        ///     if the server chooses to allow anonymous logon.
+        /// </summary>
+        /// <param name="key">The license key to use for authentication</param>
+        /// <returns>True if the login succeeded, otherwise false.</returns>
+        public async Task<bool> AuthenticateWithLicenseKey(string key)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+
+            _rpc.AttachHandlerForNextMessage(packet =>
+            {
+                var result = packet as AuthenticateResultMessage;
+                if (result == null)
+                    return;
+
+                if (result.Result != 0)
+                    tcs.SetResult(false);
+                LoginId = result.NPID;
+                SessionToken = result.SessionToken;
+                tcs.SetResult(true);
+            });
+            _rpc.Send(new AuthenticateWithKeyMessage { LicenseKey = key });
 
             return await tcs.Task;
         }
