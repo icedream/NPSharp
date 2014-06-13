@@ -225,7 +225,10 @@ namespace NPSharp.NP
             {
                 var result = (StorageWriteUserFileResultMessage) packet;
                 if (result.Result != 0)
+                {
                     tcs.SetResult(false);
+                    return;
+                }
                 tcs.SetResult(true);
             });
             RPC.Send(new StorageWriteUserFileMessage {FileData = contents, FileName = filename, NPID = LoginId});
