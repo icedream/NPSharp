@@ -93,6 +93,11 @@ namespace NPSharp.NP
                     _log.ErrorFormat("Protocol violation: {0}. Disconnect imminent.", error.Message);
                     Disconnect();
                 }
+                catch (Exception error)
+                {
+                    _log.ErrorFormat("Loop error in RPC read: {0}", error.ToString());
+                    Disconnect();
+                }
 
                 _log.Debug("Now not receiving RPC messages anymore");
             }, _cancellationToken);
