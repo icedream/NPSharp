@@ -108,6 +108,8 @@ namespace NPSharp.Master.Messages
             return Name;
         }
 
-        protected abstract void Deserialize(string[] arguments);
+        protected virtual void Deserialize(string[] arguments)
+        {
+        }
     }
 }
