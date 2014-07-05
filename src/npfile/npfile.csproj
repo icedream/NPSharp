@@ -50,7 +50,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="uhttpsharp">
-      <HintPath>..\..\packages\uHttpSharp.0.1.4.8\lib\net40\uhttpsharp.dll</HintPath>
+      <HintPath>..\..\packages\uHttpSharp.0.1.5.2\lib\net40\uhttpsharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
