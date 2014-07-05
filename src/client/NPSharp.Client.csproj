@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Authentication\SessionAuthenticationClient.cs" />
     <Compile Include="Authentication\SessionAuthenticationResult.cs" />
+    <Compile Include="Master\Data\MasterGetServersEntry.cs" />
     <Compile Include="Master\Data\MasterGetServersKeywords.cs" />
     <Compile Include="Master\Messages\Client\MasterGetServersMessage.cs" />
     <Compile Include="Master\DedicatedServerEntry.cs" />
