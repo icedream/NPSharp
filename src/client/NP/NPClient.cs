@@ -187,7 +187,7 @@ namespace NPSharp.NP
         ///     Authenticates a server ticket.
         /// </summary>
         /// <returns>True if the ticket validation succeeded, otherwise false.</returns>
-        public async Task<bool> ValidateTicket(IPAddress clientIP, Ticket ticket)
+        public async Task<bool> ValidateTicket(IPAddress clientIP, ulong guid, Ticket ticket)
         {
             var tcs = new TaskCompletionSource<bool>();
 
@@ -204,7 +204,7 @@ namespace NPSharp.NP
             {
                 ClientIP = (uint)IPAddress.HostToNetworkOrder((int)BitConverter.ToUInt32(clientIP.GetAddressBytes(), 0)),
                 Ticket = ticket.Serialize(),
-                NPID = ticket.ClientID
+                NPID = guid
             });
 
             return await tcs.Task;
