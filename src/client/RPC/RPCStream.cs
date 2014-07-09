@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using log4net;
 using NPSharp.RPC.Messages;
 
 namespace NPSharp.RPC
@@ -33,11 +32,6 @@ namespace NPSharp.RPC
             new List<KeyValuePair<uint, Action<TRecv>>>();
 
         /// <summary>
-        ///     Logger instance.
-        /// </summary>
-        private readonly ILog _log;
-
-        /// <summary>
         ///     ID of the next message.
         /// </summary>
         protected uint MessageID;
@@ -53,7 +47,6 @@ namespace NPSharp.RPC
         /// <param name="sock">Client's network stream</param>
         protected RPCStream(Socket sock)
         {
-            _log = LogManager.GetLogger("RPC");
             _sock = sock;
         }
 
@@ -138,7 +131,7 @@ namespace NPSharp.RPC
 
             _sock.Send(buffer);
 
-            if (typeof (TSend) == typeof (RPCClientMessage))
+            if (typeof(TSend) == typeof(RPCClientMessage))
                 IterateMessageID();
         }
 

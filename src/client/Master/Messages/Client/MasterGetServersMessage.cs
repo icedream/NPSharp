@@ -35,9 +35,8 @@ namespace NPSharp.Master.Messages.Client
 
         protected override string Serialize()
         {
-            // I wonder if an extra useless space char at the end is okay in this case
             return string.Format("{0} {1} {2} {3}", Name, GameName, ProtocolVersion,
-                string.Join(" ", Keywords.Select(k => k.ToString())));
+                string.Join(" ", Keywords.Distinct().Select(k => k.ToString()))).TrimEnd();
         }
 
         protected override void Deserialize(string[] arguments)

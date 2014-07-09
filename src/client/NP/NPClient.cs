@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using log4net;
 using NPSharp.RPC;
 using NPSharp.RPC.Messages.Client;
+using NPSharp.RPC.Messages.Data;
 using NPSharp.RPC.Messages.Server;
 
 namespace NPSharp.NP
@@ -20,7 +21,8 @@ namespace NPSharp.NP
         private readonly ushort _port;
         private CancellationToken _cancellationToken;
         private CancellationTokenSource _cancellationTokenSource;
-        private RPCClientStream _rpc;
+
+        public RPCClientStream RPC { get; private set; }
 
         /// <summary>
         ///     Initializes the NP client with a specified host and port.
@@ -37,7 +39,7 @@ namespace NPSharp.NP
         /// <summary>
         ///     The internal RPC client.
         /// </summary>
-        public RPCClientStream RPCClient { get { return _rpc; } }
+        public RPCClientStream RPCClient { get; private set; }
 
         /// <summary>
         ///     The assigned NP user ID. Will be set on successful authentication.
@@ -63,7 +65,7 @@ namespace NPSharp.NP
 
             try
             {
-                _rpc = RPCClientStream.Open(_host, _port);
+                RPC = RPCClientStream.Open(_host, _port);
             }
             catch (Exception err)
             {
@@ -82,13 +84,18 @@ namespace NPSharp.NP
                 {
                     while (true)
                     {
-                        if (_rpc.Read() == null)
+                        if (RPC.Read() == null)
                             break;
                     }
                 }
                 catch (ProtocolViolationException error)
                 {
                     _log.ErrorFormat("Protocol violation: {0}. Disconnect imminent.", error.Message);
+                    Disconnect();
+                }
+                catch (Exception error)
+                {
+                    _log.ErrorFormat("Loop error in RPC read: {0}", error.ToString());
                     Disconnect();
                 }
 
@@ -109,7 +116,7 @@ namespace NPSharp.NP
             _cancellationTokenSource.Cancel(true);
             // TODO: Find a cleaner way to cancel _processingTask (focus: _rpc.Read)
             //_procTask.Wait(_cancellationToken);
-            _rpc.Close();
+            RPC.Close();
 
             LoginId = 0;
 
@@ -127,7 +134,7 @@ namespace NPSharp.NP
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = packet as AuthenticateResultMessage;
                 if (result == null)
@@ -139,7 +146,7 @@ namespace NPSharp.NP
                 SessionToken = result.SessionToken;
                 tcs.SetResult(true);
             });
-            _rpc.Send(new AuthenticateWithTokenMessage {Token = token});
+            RPC.Send(new AuthenticateWithTokenMessage {Token = token});
 
             return await tcs.Task;
         }
@@ -154,7 +161,7 @@ namespace NPSharp.NP
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = packet as AuthenticateResultMessage;
                 if (result == null)
@@ -171,31 +178,34 @@ namespace NPSharp.NP
                 SessionToken = result.SessionToken;
                 tcs.SetResult(true);
             });
-            _rpc.Send(new AuthenticateWithKeyMessage { LicenseKey = key });
+            RPC.Send(new AuthenticateWithKeyMessage { LicenseKey = key });
 
             return await tcs.Task;
         }
 
-        public async Task<bool> ValidateTicket(uint clientIP, ulong npID, byte[] ticket)
+        /// <summary>
+        ///     Authenticates a server ticket.
+        /// </summary>
+        /// <returns>True if the ticket validation succeeded, otherwise false.</returns>
+        public async Task<bool> ValidateTicket(IPAddress clientIP, Ticket ticket)
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = packet as AuthenticateValidateTicketResultMessage;
                 if (result == null)
                     return;
 
-                if (result.Result != 0)
-                {
-                    tcs.SetResult(false);
-                }
-                else
-                {
-                    tcs.SetResult(true);
-                }
+                tcs.SetResult(result.Result == 0);
             });
-            _rpc.Send(new AuthenticateValidateTicketMessage { ClientIP = clientIP, Ticket = ticket, NPID = npID });
+
+            RPC.Send(new AuthenticateValidateTicketMessage
+            {
+                ClientIP = (uint)IPAddress.HostToNetworkOrder((int)BitConverter.ToUInt32(clientIP.GetAddressBytes(), 0)),
+                Ticket = ticket.Serialize(),
+                NPID = ticket.ClientID
+            });
 
             return await tcs.Task;
         }
@@ -211,14 +221,17 @@ namespace NPSharp.NP
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = (StorageWriteUserFileResultMessage) packet;
                 if (result.Result != 0)
+                {
                     tcs.SetResult(false);
+                    return;
+                }
                 tcs.SetResult(true);
             });
-            _rpc.Send(new StorageWriteUserFileMessage {FileData = contents, FileName = filename, NPID = LoginId});
+            RPC.Send(new StorageWriteUserFileMessage {FileData = contents, FileName = filename, NPID = LoginId});
 
             return await tcs.Task;
         }
@@ -232,7 +245,7 @@ namespace NPSharp.NP
         {
             var tcs = new TaskCompletionSource<byte[]>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = (StorageUserFileMessage) packet;
                 if (result.Result != 0)
@@ -242,7 +255,7 @@ namespace NPSharp.NP
                 }
                 tcs.SetResult(result.FileData);
             });
-            _rpc.Send(new StorageGetUserFileMessage {FileName = filename, NPID = LoginId});
+            RPC.Send(new StorageGetUserFileMessage {FileName = filename, NPID = LoginId});
 
             return await tcs.Task;
         }
@@ -270,7 +283,7 @@ namespace NPSharp.NP
         {
             var tcs = new TaskCompletionSource<byte[]>();
 
-            _rpc.AttachHandlerForNextMessage(packet =>
+            RPC.AttachHandlerForNextMessage(packet =>
             {
                 var result = (StoragePublisherFileMessage) packet;
                 if (result.Result != 0)
@@ -280,7 +293,7 @@ namespace NPSharp.NP
                 }
                 tcs.SetResult(result.FileData);
             });
-            _rpc.Send(new StorageGetPublisherFileMessage {FileName = filename});
+            RPC.Send(new StorageGetPublisherFileMessage {FileName = filename});
 
             return await tcs.Task;
         }
@@ -299,7 +312,7 @@ namespace NPSharp.NP
 
         public void SendRandomString(string data)
         {
-            _rpc.Send(new StorageSendRandomStringMessage {RandomString = data});
+            RPC.Send(new StorageSendRandomStringMessage {RandomString = data});
         }
     }
 }
