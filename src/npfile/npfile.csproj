@@ -49,8 +49,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
-    <Reference Include="uhttpsharp">
-      <HintPath>..\..\packages\uHttpSharp.0.1.5.2\lib\net40\uhttpsharp.dll</HintPath>
+    <Reference Include="uhttpsharp, Version=0.1.5307.27114, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\uHttpSharp.0.1.5.4\lib\net40\uhttpsharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
