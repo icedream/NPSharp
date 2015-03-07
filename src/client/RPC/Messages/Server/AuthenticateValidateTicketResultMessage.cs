@@ -15,5 +15,8 @@ namespace NPSharp.RPC.Messages.Server
 
         [ProtoMember(3)]
         public int GroupID { get; set; }
+
+        [ProtoMember(4, IsRequired = false)]
+        public string Identifiers { get; set; }
     }
 }

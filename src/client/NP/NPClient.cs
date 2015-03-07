@@ -187,9 +187,9 @@ namespace NPSharp.NP
         ///     Authenticates a server ticket.
         /// </summary>
         /// <returns>True if the ticket validation succeeded, otherwise false.</returns>
-        public async Task<bool> ValidateTicket(IPAddress clientIP, ulong guid, Ticket ticket)
+        public async Task<TicketValidationResult> ValidateTicket(IPAddress clientIP, ulong guid, Ticket ticket)
         {
-            var tcs = new TaskCompletionSource<bool>();
+            var tcs = new TaskCompletionSource<TicketValidationResult>();
 
             RPC.AttachHandlerForNextMessage(packet =>
             {
@@ -197,7 +197,7 @@ namespace NPSharp.NP
                 if (result == null)
                     return;
 
-                tcs.SetResult(result.Result == 0);
+                tcs.SetResult(new TicketValidationResult(result));
             });
 
             RPC.Send(new AuthenticateValidateTicketMessage
