@@ -37,11 +37,6 @@ namespace NPSharp.NP
         }
 
         /// <summary>
-        ///     The internal RPC client.
-        /// </summary>
-        public RPCClientStream RPCClient { get; private set; }
-
-        /// <summary>
         ///     The assigned NP user ID. Will be set on successful authentication.
         /// </summary>
         public ulong LoginId { get; private set; }
