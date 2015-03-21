@@ -117,6 +117,7 @@
     <Compile Include="Steam\SteamID_t.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="NPSharp.Client.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

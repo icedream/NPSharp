@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/icedream/NPSharp/blob/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/icedream/NPSharp</projectUrl>
+    <iconUrl>http://nuget.icedream.kthx.at/packageimages/NPSharp/nuget.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>
+    </releaseNotes>
+    <copyright>(c) 2014-2015 Carl Kittelberger</copyright>
+    <tags>
+      NP
+      Network
+      Platform
+      Client
+      fourDeltaOne
+      refint
+      protocol
+      game
+      games
+    </tags>
+  </metadata>
+</package>
