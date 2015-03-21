@@ -4,5 +4,4 @@ mono:
   - 3.10.0
   - 3.8.0
   - 3.2.8
-  - 2.10.8
 solution: libnpsharp.sln
