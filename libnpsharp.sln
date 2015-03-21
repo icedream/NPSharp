@@ -18,8 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{F8
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPSharp.Client", "src\client\NPSharp.Client.csproj", "{C6F941A5-82AF-456A-9B3A-752E5B001035}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPSharp.Server", "src\server\NPSharp.Server.csproj", "{1A5AC63A-250E-4BC8-B81A-822AC31F5E37}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
