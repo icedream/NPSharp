@@ -91,15 +91,14 @@ namespace NPSharp.NP
                 catch (ProtocolViolationException error)
                 {
                     _log.ErrorFormat("Protocol violation: {0}. Disconnect imminent.", error.Message);
-                    Disconnect();
                 }
                 catch (Exception error)
                 {
                     _log.ErrorFormat("Loop error in RPC read: {0}", error.ToString());
-                    Disconnect();
                 }
 
                 _log.Debug("Now not receiving RPC messages anymore");
+                Disconnect();
             }, _cancellationToken);
 
             _log.Debug("Connect() done");
@@ -187,9 +186,9 @@ namespace NPSharp.NP
         ///     Authenticates a server ticket.
         /// </summary>
         /// <returns>True if the ticket validation succeeded, otherwise false.</returns>
-        public async Task<bool> ValidateTicket(IPAddress clientIP, ulong guid, Ticket ticket)
+        public async Task<TicketValidationResult> ValidateTicket(IPAddress clientIP, ulong guid, Ticket ticket)
         {
-            var tcs = new TaskCompletionSource<bool>();
+            var tcs = new TaskCompletionSource<TicketValidationResult>();
 
             RPC.AttachHandlerForNextMessage(packet =>
             {
@@ -197,7 +196,7 @@ namespace NPSharp.NP
                 if (result == null)
                     return;
 
-                tcs.SetResult(result.Result == 0);
+                tcs.SetResult(new TicketValidationResult(result));
             });
 
             RPC.Send(new AuthenticateValidateTicketMessage
