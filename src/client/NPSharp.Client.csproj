@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <Platform Condition="$(Platform) != 'AnyCPU' And $(Platform) != 'x86' And $(Platform) != 'x64'">AnyCPU</Platform>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>b8f4ba3f</NuGetPackageImportStamp>
   </PropertyGroup>
